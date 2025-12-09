@@ -1,0 +1,44 @@
+# 09_seguridad.yml - PKI, sudoers, security checks
+
+    - name: pkis pem x509
+      shell: find  /etc/pki/ /etc/pki/ca-trust/ -name "*.pem" -exec sh -c 'echo dbd{}dbd && openssl x509 -in {} -noout -text ' \;| sed 's/dbd/<br>/g'
+      register: pkix509
+      ignore_errors: True
+
+    - name: pkis pem x509
+      shell: find  /etc/pki/ /etc/pki/ca-trust/ -name "*.crt" -exec sh -c 'echo dbd{}dbd && openssl x509 -in {} -noout -text ' \;| sed 's/dbd/<br>/g'
+      register: pkiCRTx509
+      ignore_errors: True
+
+    - name: usuarios de sistema
+      shell: echo -e "$(awk -F':' '{print $1}' /etc/passwd|while read NODE RESTO ; do id $NODE;done)"
+      register: homeusers
+
+    - name: sudo
+      shell: visudo -c | grep -i sudo && echo '<hr>' && grep wheel /etc/group
+      register: sudoers
+      ignore_errors: True
+
+
+    - name: Fichero FSTAB
+      shell: cat -A /etc/fstab
+      register: etcfstab
+
+    - name: revisa fstab
+      shell: echo -e "$(cat -A /etc/fstab|grep -E '\^')"
+      register: etcfstaberror
+
+    - name: Fichero config
+      shell: ls -ltra /opt/wildfly-10.1.0.Final/standalone/configuration/ || echo -e '<p style=color:red;>⚠️ ⚠️ REVISAR_⚠️ ⚠️ SIN CONFIGURACIÓN Fichero config _REVISAR</p>'
+      register: etcconfigini
+      ignore_errors: True
+
+    - name: configuracion de dominio
+      shell: realm list |grep ':' || echo -e '<p style=color:red;>⚠️ ⚠️ REVISAR_⚠️ ⚠️ SIN CONFIGURACIÓN REALMD _REVISAR</p>'
+      register: realmlist
+
+    - name: Fichero config dominio
+      command: cat -A /etc/sssd/sssd.conf
+      register: fichsssd
+      ignore_errors: True
+

@@ -1,0 +1,30 @@
+# 05_historial.yml - installed patches and history
+
+    - name: ultimos  paquetes instalados
+      shell: echo -e "<p>$(rpm -qa --last | head -50|sed 's/CEST/<br>/g' )</p>"
+      register: ulti
+      changed_when: false
+      failed_when: false
+
+    - name: historico de actualizaciones yum
+      shell: yum history list -v  |grep -v Updating  
+      register: histo
+      changed_when: false
+      failed_when: false
+
+
+    - name: Parches instalados en la maquina rhel8 {{ ansible_hostname }}
+      shell: yum updateinfo list installed |sort -u |grep -v 'kB/s'  > {{ fich1 }}
+      when:
+        - ansible_distribution == "RedHat"
+        - ansible_distribution_major_version == "8"
+
+    - name: Parches instalados en la maquina rhel7 {{ ansible_hostname }}
+      shell: echo  "<pre><details><p>$(yum updateinfo list installed | sed -e 's/</_/g'|sed -e 's/ RH/<br>RH/g')</p></pre></details><br> |sed  's/Actualizar ID\:/<br><h3></p></details><br>Instalado ID\:<\/h3><br>/g'|sed 's/Update ID \:/</p></details><br><h3>Instalado ID\:<\/h3><br>/g'" > {{ fich1 }}
+      when:
+        - ansible_distribution == "RedHat"
+        - ansible_distribution_major_version == "7"
+
+    - name: instalados en 
+      shell: cat {{ fich1 }} | grep -v ' 00:00' |grep -v 'Updating'
+      register: rpminstalados

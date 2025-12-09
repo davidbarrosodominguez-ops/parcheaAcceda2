@@ -1,0 +1,27 @@
+# 03_updates.yml - check updates, kernel, suggested versions
+
+    - name: Paquetes disponibles para actualizar
+      shell: yum list updates |grep -v ' 00:00'|grep -v 'Updating'
+      register: Lis
+      ignore_errors: True
+
+    - name: parches de seguridad actualizables en la maquina rhel7 {{ ansible_hostname }}
+      shell: echo -e "<details><p>$(yum updateinfo list updates|awk '{print $1}'|sort -u |grep '-'|xargs yum info-sec --assumeyes| sed -e 's/</_/g'| sed -e 's/=============================================================/<hr><\/details><hr><p>/g'| sed -e 's/===/ /g')</p></details><br>"  > {{ fich2 }}
+      when:
+        - ansible_distribution == "RedHat"
+        - ansible_distribution_major_version == "7"
+
+    - name: parches de seguridad actualizables en la maquina rhel8 {{ ansible_hostname }}
+      shell: echo -e "<p><details> $(dnf updateinfo list updates |grep -v ' 00:00'|grep -v 'Updating')</details></p><br><hr>"   > {{ fich2 }}
+      when:
+        - ansible_distribution == "RedHat"
+        - ansible_distribution_major_version == "8"
+
+    - name: pendiente seguridad
+      shell: cat {{ fich2 }}
+      register: rpmsegactualizables
+
+    - name: paquetes obsoletos o sin reclamo
+      shell: echo -e "Obsoletos<tr>$(yum list obsoletes|grep -v '00:00')</tr>" && echo "Innecesarios<tr>$(dnf repoquery --unneeded|grep -v '00:00')</tr>"|| echo -e '<p style=color:red;>sin obsoletos e innecesarios</p>'
+      register: reclamo
+      ignore_errors: True

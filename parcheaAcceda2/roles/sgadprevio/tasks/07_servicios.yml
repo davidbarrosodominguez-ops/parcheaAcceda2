@@ -1,0 +1,57 @@
+# 07_servicios.yml - services and processes
+
+    - name: servicios activos en {{ ansible_hostname }}
+      command: systemctl list-units --state running  --type service --all --no-legend --plain --no-pager
+      register: serviciosrunning
+
+    - name: servicios Fallidos
+      command: systemctl list-units --state failed  --type service --all --no-legend --plain --no-pager
+      register: serviciosFallidos
+      ignore_errors: True
+
+    - name: Fichero HOSTS
+      shell: cat -A /etc/hosts 
+      register: etchosts
+
+    - name: revisa hosts
+      shell: echo -e "$(cat -A /etc/hosts|grep -v ^#|grep -E '\^')"
+      register: etchostserror
+
+    - name: conectividad COMMVAULT-NG
+      shell: nc -vz   10.254.227.28  8400 --verbose && echo "CONEXIÓN CORRECTA A COMMVAULT-NG" || echo -e '<p style=color:red;>REVISAR_.._REVISAR</p>'
+      register: conectcommvault
+
+    - name: conectividad AAP
+      shell: nc -vz   10.254.227.28  22 --verbose && echo "CONEXIÓN CORRECTA A AAP" || echo -e '<p style=color:red;>⚠️ ⚠️REVISAR_.._REVISAR</p>'
+      register: conectaap
+
+    - name: DNS COMMVAULT-NG
+      shell: cat  /etc/hosts| grep -i MA-NG |wc -l
+      register: dnscommvault
+
+
+    - name: synchronized
+      shell: timedatectl| grep 'synchronized.*yes' || echo -e '<p style=color:red;>REVISAR_⚠️ ⚠️SERVIDOR HORARIO NO SINCRONIZADO_REVISAR ⚠️ ⚠️_REVISAR</p>'
+      register: synchronized
+
+    - name: ntpd
+      shell: ntpq -p | grep '*' || echo -e '<p style=color:red;>REVISAR_⚠️ ⚠️NO SE USA NTPD ver si se detectaron fallos en chronyd El estado de sincronizacion es {{ synchronized.stdout_lines }} ⚠️ ⚠️_REVISAR</p>'
+      register: sincrontpd
+      ignore_errors: True
+
+
+    - name: chronyd
+      shell: chronyc sources | grep '*' || echo -e '<p style=color:red;>REVISAR_⚠️ ⚠️NO SE USA CHRONYD ver si se detectaron fallos en ntpd El estado de sincronizacion es {{ synchronized.stdout_lines }} ⚠️ ⚠️_REVISAR</p>'
+      register: sincrochronie
+      ignore_errors: True
+
+    - name: Configuracion commvault
+      shell:  commvault status || echo "⚠️ ⚠️ REVISAR_⚠️ ⚠️Configuracion commvault_REVISAR"
+      register: commvaultstatus
+      ignore_errors: True
+
+    - name: status de RHC
+      shell: rhc status || echo -e '<p style=color:red;>REVISAR_⚠️ ⚠️ SIN RHC INSTALADO_REVISAR</p>'
+      register: rhcstatus
+      ignore_errors: True
+

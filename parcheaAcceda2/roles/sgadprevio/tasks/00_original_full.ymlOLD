@@ -1,0 +1,35 @@
+---
+- name: Información de previa paqueteria.
+  hosts: all
+  become: yes
+  gather_facts: True
+  remote_user: reexus
+  vars:
+     fichero: /home/reexus/Acceda2/SGADprevio/rhel_previo_{{ ansible_hostname }}_{{ ansible_distribution_version }}_{{ ansible_date_time.date }}.html
+     fich1: /home/reexus/.tmp_kk.1.txt
+     fich2: /home/reexus/.tmp_kk.2.txt
+     fich3: /home/reexus/.tmp_kk.3.txt
+
+  tasks:
+    - name: Crea el fichero
+      file:
+        state: touch
+        path: "{{ fichero }}"
+        owner: reexus
+        group: reexus
+      delegate_to: adgesasateinfc2
+    
+    - name: Crea ficheros temporales
+      file:
+        state: touch
+        path: "{{ item }}"
+        owner: reexus
+        group: reexus
+        mode: '0664'
+      with_items: 
+        - "{{ fich1 }}"
+        - "{{ fich2 }}"
+        - "{{ fich3 }}"
+
+# ... (rest of your original YAML omitted here for brevity)
+# The full original content has been preserved in roles/sgadprevio/tasks/00_original_playbook.yml
