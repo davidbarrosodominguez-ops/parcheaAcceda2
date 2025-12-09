@@ -3,6 +3,7 @@
 ## Introducción
 Este proyecto implementa una auditoría automática previa al parcheado ("Health Check") para servidores Red Hat Enterprise Linux (RHEL). Su objetivo es recopilar el estado actual del sistema, verificar prerequisitos de actualización y generar informes detallados para los administradores.
 
+
 ## Estructura del Directorio
 El proyecto sigue una estructura estándar de Ansible, aunque con algunas particularidades:
 
