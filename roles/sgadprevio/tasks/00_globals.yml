@@ -1,0 +1,12 @@
+# 00_globals.yml - variables and small helpers
+- name: Set local variables for SGADprevio
+  hosts: all
+  become: yes
+  gather_facts: no
+  remote_user: reexus
+  vars:
+    fichero: /home/reexus/Acceda2/SGADprevio/rhel_previo_{{ ansible_hostname }}_{{ ansible_distribution_version }}_{{ ansible_date_time.date }}.html
+    fich1: /home/reexus/.tmp_kk.1.txt
+    fich2: /home/reexus/.tmp_kk.2.txt
+    fich3: /home/reexus/.tmp_kk.3.txt
+  tasks: []

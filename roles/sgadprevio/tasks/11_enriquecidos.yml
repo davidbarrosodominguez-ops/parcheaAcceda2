@@ -1,0 +1,56 @@
+# 10_enriquecidos.yml - enrichment and contact info (delegated)
+    - name: fecha de parcheado inicial del ciclo
+      shell: echo -e "$(grep -ih {{ ansible_hostname }}.gest.2001.nubesara.es /home/reexus/enriquece/paraenriquecerParchea.lst | awk '{print $(NF-2)}' )" 
+      register: fechaparcheado
+      delegate_to: adgesasateinfc2
+      ignore_errors: True
+
+#    - name: Asignar enriquece datos
+#      shell: grep -ih {{ ansible_hostname }} /home/reexus/enriquece/paraenriquecerParchea.lst  || echo -e '<p style=color:red;>REVISAR_⚠️ ⚠️NO HAY DATOS ENRIQUECIDOS_REVISAR</p>'
+#      register: enriquece
+#      delegate_to: adgesasateinfc2
+#      ignore_errors: True
+
+    - name: Fechas de parcheado
+      shell: echo -e "$(/bin/python3 /home/reexus/Acceda2/fechas_parcheado.py {{ fechaparcheado.stdout }} 6 | sort -u )"
+      register: fechas_parcheado
+      delegate_to: adgesasateinfc2
+      ignore_errors: True
+
+    - name: contacto
+      shell: echo  "$(grep -ih {{ ansible_hostname }} /home/reexus/enriquece/paraenriquecerParchea.lst |awk '{print $NF}')"
+      register: contacto
+      delegate_to: adgesasateinfc2
+      ignore_errors: True
+
+    - name: Aplicacion 
+      shell: echo -e $(grep -ih {{ ansible_hostname }} /home/reexus/enriquece/paraenriquecerParchea.lst |awk '{print $(NF-1)}')
+      register: aplicacion
+      delegate_to: adgesasateinfc2
+      ignore_errors: True
+
+    - name: procesos de aplicacion {{ aplicacion.stdout }}
+      shell: ps -Ao pid,ppid,cmd,%mem,%cpu  --sort -pcpu | grep -v grep | egrep "java|loudera|wildfly|jboss|httpd|weblogic|apache|Ora|ora|appian" || echo "<p style=color:red;>REVISAR_ {{ aplicacion.stdout }} No localizados procesos {{ aplicacion.stdout }}  _REVISAR"
+      register: procesosapp
+      ignore_errors: True
+
+    - name: log de aplicacion {{ aplicacion.stdout }}
+      shell: tail -50 /opt/appian/appian/logs/tomcat-stdOut.log /opt/sophos-spl/plugins/eventjournaler/log/eventjournaler.log|| echo "<p style=color:red;>REVISAR_LOG {{ aplicacion.stdout }} No localizado en tomcat-stdOut_REVISAR" 
+      register: erroraplicacion
+      ignore_errors: True
+
+    - name: comunicacion de aplicacion {{ aplicacion.stdout }}
+      shell: ss -tlpn | grep -v grep | egrep "java|loudera|wildfly|jboss|httpd|weblogic|apache|Ora|ora|appian"
+      register: commapp
+      ignore_errors: True
+
+    - name: resumen
+      command:  yum updateinfo -C
+      register: resumen
+      ignore_errors: True
+
+
+    - name: servicio {{ aplicacion.stdout }}
+      shell: systemctl status httpd.service wildfly101-afirma.service | grep loaded |cut -d '(' -f 2 |cut -d ';' -f 1 | /usr/bin/sed -e ':a;N;$!ba;s/\n/:/g' | /usr/bin/sed 's/\/etc\/systemd\/system\///g'
+      register: systemctlapp
+      ignore_errors: True

@@ -1,0 +1,15 @@
+# Archivo principal de tareas para el rol sgadprevio
+    - include_vars:  all_vars.yml
+    - include_tasks: 01_prechecks.yml
+    - include_tasks: 02_subscription.yml
+    - include_tasks: 03_repos.yml
+    - include_tasks: 04_historial.yml
+    - include_tasks: 05_updates.yml
+    - include_tasks: 06_red.yml
+    - include_tasks: 07_servicios.yml
+    - include_tasks: 08_seguridad.yml
+    - include_tasks: 09_hardware.yml
+    - include_tasks: 10_discos.yml
+    - include_tasks: 11_enriquecidos.yml
+    - include_tasks: 12_report.yml
+    - include_tasks: 13_postchecks.yml

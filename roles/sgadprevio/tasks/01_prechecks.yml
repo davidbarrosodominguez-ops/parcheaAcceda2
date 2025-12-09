@@ -1,0 +1,21 @@
+# 01_prechecks.yml - create files, gather minimal facts
+
+    - name: Crea el fichero
+      file:
+        state: touch
+        path: "{{ fichero }}"
+        owner: reexus
+        group: reexus
+      delegate_to: adgesasateinfc2
+    
+    - name: Crea ficheros temporales
+      file:
+        state: touch
+        path: "{{ item }}"
+        owner: reexus
+        group: reexus
+        mode: '0664'
+      with_items: 
+        - "{{ fich1 }}"
+        - "{{ fich2 }}"
+        - "{{ fich3 }}"
