@@ -90,3 +90,73 @@ In this case, the Ansible task is responsible for generating an HTML snippet. If
 - The port list should be compared against a blacklist of insecure ports (initially: 21, 23, 80, 110, 143).
 - If a match is found, it should register a result that the template can use to display a `REVISAR_..._REVISAR` message in the final report.
 - **Benefit**: Increases the security audit's coverage and aligns the role's implementation with its specifications.
+
+## 8. Refactor Error Generation to the Template
+**Problem**: Following the principle of point 6, many tasks that check states and can fail generate the `REVISAR_` message directly in the `shell`. This couples the task's logic to the error's presentation.
+
+**Refactoring Example**:
+The `cabecera.html.j2` template is already set up to handle this logic. For example, it checks if a variable has content and, if not, displays an error.
+
+*   **Case Study**: Task `configuracion de dominio` in `08_seguridad.yml`.
+
+*   **🔴 BEFORE (Current Code)**:
+    ```yaml
+    - name: configuracion de dominio
+      shell: realm list |grep ':' || echo -e '<p style=color:red;>⚠️ ⚠️ REVISAR_⚠️ ⚠️ SIN CONFIGURACIÓN REALMD _REVISAR</p>'
+      register: realmlist
+    ```
+
+*   **🟢 AFTER (Proposed Solution)**:
+    1.  **Simplify the Task**: The task only gathers the data and doesn't worry about the error.
+        ```yaml
+        - name: configuracion de dominio
+          shell: realm list | grep ':'
+          register: realmlist
+          ignore_errors: True
+          changed_when: false
+        ```
+    2.  **Move Logic to the Template (`.j2`)**: The template checks the variable and displays the error if necessary.
+        ```jinja
+        <details>
+            <summary>DOMAIN DATA</summary>
+            {% if realmlist.stdout | trim %}
+                <p>{{ realmlist.stdout_lines | join('<br>') }}</p>
+            {% else %}
+                <p style="color:red;">REVISAR_⚠️ ⚠️ NO DOMAIN CONFIGURATION (REALMD) FOUND_REVISAR</p>
+            {% endif %}
+        </details>
+        ```
+
+**Recommended Action**: Apply this pattern to all candidate tasks to centralize error presentation logic in the template and clean up the Ansible tasks.
+
+### List of Candidate Tasks for Refactoring
+
+*   **02_subscription.yml**:
+    *   `Version sugerida por redhat`
+    *   `subscripcion`
+*   **03_repos.yml**:
+    *   `Repositorios disponibles`
+    *   `release en satellite`
+*   **06_red.yml**:
+    *   `rutas ip r`
+    *   `rutas route`
+    *   `rutas all`
+    *   `rutas nmcli`
+    *   `master slave`
+    *   `revisa bootproto ifcfg-bond1`
+*   **07_servicios.yml**:
+    *   `conectividad COMMVAULT-NG`
+    *   `conectividad AAP`
+    *   `synchronized`
+    *   `ntpd`
+    *   `chronyd`
+    *   `Configuracion commvault`
+    *   `status de RHC`
+*   **08_seguridad.yml**:
+    *   `Fichero config`
+    *   `configuracion de dominio`
+*   **10_discos.yml**:
+    *   `MONTAJE DISCOS`
+*   **11_enriquecidos.yml**:
+    *   `procesos de aplicacion`
+    *   `log de aplicacion`

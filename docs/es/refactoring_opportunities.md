@@ -90,3 +90,73 @@ En este caso, la tarea de Ansible es responsable de generar un fragmento de HTML
 - Se debe comparar la lista de puertos con una lista negra de puertos inseguros (inicialmente: 21, 23, 80, 110, 143).
 - Si se encuentra una coincidencia, se debe registrar un resultado que la plantilla pueda utilizar para mostrar un mensaje `REVISAR_..._REVISAR` en el informe final.
 - **Beneficio**: Aumenta la cobertura de la auditoría de seguridad y alinea la implementación del rol con sus especificaciones.
+
+## 8. Refactorizar Generación de Errores a la Plantilla
+**Problema**: Siguiendo el principio del punto 6, muchas tareas que comprueban estados y pueden fallar, generan el mensaje de `REVISAR_` directamente en la `shell`. Esto acopla la lógica de la tarea a la presentación del error.
+
+**Ejemplo de Refactorización**:
+La plantilla `cabecera.html.j2` ya está preparada para manejar esta lógica. Por ejemplo, comprueba si una variable tiene contenido y, si no, muestra un error.
+
+*   **Caso de estudio**: Tarea `configuracion de dominio` en `08_seguridad.yml`.
+
+*   **🔴 ANTES (Código actual)**:
+    ```yaml
+    - name: configuracion de dominio
+      shell: realm list |grep ':' || echo -e '<p style=color:red;>⚠️ ⚠️ REVISAR_⚠️ ⚠️ SIN CONFIGURACIÓN REALMD _REVISAR</p>'
+      register: realmlist
+    ```
+
+*   **🟢 DESPUÉS (Solución propuesta)**:
+    1.  **Simplificar la tarea**: La tarea solo recoge el dato y no se preocupa del error.
+        ```yaml
+        - name: configuracion de dominio
+          shell: realm list | grep ':'
+          register: realmlist
+          ignore_errors: True
+          changed_when: false
+        ```
+    2.  **Mover lógica a la plantilla (`.j2`)**: La plantilla comprueba la variable y muestra el error si es necesario.
+        ```jinja
+        <details>
+            <summary>DATOS DE DOMINIO</summary>
+            {% if realmlist.stdout | trim %}
+                <p>{{ realmlist.stdout_lines | join('<br>') }}</p>
+            {% else %}
+                <p style="color:red;">REVISAR_⚠️ ⚠️ NO HAY CONFIGURACIÓN DE DOMINIO (REALMD)_REVISAR</p>
+            {% endif %}
+        </details>
+        ```
+
+**Acción Recomendada**: Aplicar este patrón a todas las tareas candidatas para centralizar la lógica de presentación de errores en la plantilla y limpiar las tareas de Ansible.
+
+### Lista de Tareas Candidatas para Refactorizar
+
+*   **02_subscription.yml**:
+    *   `Version sugerida por redhat`
+    *   `subscripcion`
+*   **03_repos.yml**:
+    *   `Repositorios disponibles`
+    *   `release en satellite`
+*   **06_red.yml**:
+    *   `rutas ip r`
+    *   `rutas route`
+    *   `rutas all`
+    *   `rutas nmcli`
+    *   `master slave`
+    *   `revisa bootproto ifcfg-bond1`
+*   **07_servicios.yml**:
+    *   `conectividad COMMVAULT-NG`
+    *   `conectividad AAP`
+    *   `synchronized`
+    *   `ntpd`
+    *   `chronyd`
+    *   `Configuracion commvault`
+    *   `status de RHC`
+*   **08_seguridad.yml**:
+    *   `Fichero config`
+    *   `configuracion de dominio`
+*   **10_discos.yml**:
+    *   `MONTAJE DISCOS`
+*   **11_enriquecidos.yml**:
+    *   `procesos de aplicacion`
+    *   `log de aplicacion`
