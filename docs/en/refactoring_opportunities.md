@@ -80,3 +80,13 @@ In this case, the Ansible task is responsible for generating an HTML snippet. If
   {% endif %}
   ```
 - **Benefit**: This follows the principle of separation of concerns, making both the Ansible role and the HTML template much easier to maintain and modify independently.
+
+## 7. Implement Insecure Port Check
+**Problem**: The specification `specs/REGLAS_SEGURIDAD.md` defines a rule to detect insecure open ports (e.g., 21/ftp, 23/telnet). However, this check is not currently implemented in any task, which creates an inconsistency between the documentation and the actual audit.
+
+**Recommended Action**:
+- Add a new task in the `roles/sgadprevio/tasks/08_seguridad.yml` file.
+- This task should use a command like `ss -tlpn` to list listening TCP ports.
+- The port list should be compared against a blacklist of insecure ports (initially: 21, 23, 80, 110, 143).
+- If a match is found, it should register a result that the template can use to display a `REVISAR_..._REVISAR` message in the final report.
+- **Benefit**: Increases the security audit's coverage and aligns the role's implementation with its specifications.

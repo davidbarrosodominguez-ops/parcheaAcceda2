@@ -80,3 +80,13 @@ En este caso, la tarea de Ansible es responsable de generar un fragmento de HTML
   {% endif %}
   ```
 - **Beneficio**: Esto sigue el principio de separación de conceptos, haciendo que tanto el rol de Ansible como la plantilla HTML sean mucho más fáciles de mantener y modificar de forma independiente.
+
+## 7. Implementar Comprobación de Puertos Inseguros
+**Problema**: La especificación `specs/REGLAS_SEGURIDAD.md` define una regla para detectar puertos inseguros abiertos (ej: 21/ftp, 23/telnet). Sin embargo, esta comprobación no está implementada actualmente en ninguna tarea, lo que genera una inconsistencia entre la documentación y la auditoría real.
+
+**Acción Recomendada**:
+- Añadir una nueva tarea en el fichero `roles/sgadprevio/tasks/08_seguridad.yml`.
+- Esta tarea debe utilizar un comando como `ss -tlpn` para listar los puertos TCP en escucha.
+- Se debe comparar la lista de puertos con una lista negra de puertos inseguros (inicialmente: 21, 23, 80, 110, 143).
+- Si se encuentra una coincidencia, se debe registrar un resultado que la plantilla pueda utilizar para mostrar un mensaje `REVISAR_..._REVISAR` en el informe final.
+- **Beneficio**: Aumenta la cobertura de la auditoría de seguridad y alinea la implementación del rol con sus especificaciones.
