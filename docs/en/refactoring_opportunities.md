@@ -7,27 +7,76 @@ This document details areas for improvement identified in the current code to fa
 **Recommended Action**: Delete or archive `playbooks/rhel_SGADprevioAcceda2.yml`. Use `sgadprevio.yml` exclusively, invoking the role.
 
 ## 2. Path and Variable Management
-**Issue**: Many paths are hardcoded (e.g., `/home/reexus/...`, `/opt/...`).
+**Issue**: There are multiple paths and filenames defined directly in the task files and the main playbook, which makes it difficult to adapt the role to different environments.
+
+**Specific Examples:**
+- **Main Playbook (`sgadprevio.yml`):** The paths for temporary files and the final report are hardcoded (e.g., `/home/reexus/Acceda2/SGADprevio/rhel_previo_{{...}}.html`).
+- **Security Task (`08_seguridad.yml`):** The path to find the application's configuration is fixed to a specific Wildfly version: `/opt/wildfly-10.1.0.Final/standalone/configuration/`.
+- **Enrichment Tasks (`11_enriquecidos.yml`):** The paths to the enrichment files (`paraenriquecerParchea.lst`) and the logo (`LOGO_GOB_MTDFP_AEAD.png`) are absolute and depend on the `reexus` user.
+
 **Recommended Action**:
-- Move all paths to variables in `defaults/main.yml` or `vars/main.yml`.
-- Use relative paths or inventory variables where possible.
+- **Centralize variables:** Move all these paths to the role's variables file (`roles/sgadprevio/vars/all_vars.yml`).
+- **Create variables for:**
+  - `report_base_path`: Base directory for reports.
+  - `app_config_path`: Path to the application's configuration directory.
+  - `enrichment_file_path`: Path to the enrichment file.
+  - `logo_file_path`: Path to the logo file.
+- This would allow a user to easily override these paths from the inventory or an extra variables file, making the role much more reusable.
 
 ## 3. Ansible Modules vs Shell Usage
-**Issue**: Extensive use of `shell` and `command` modules with complex pipes (`| grep | awk ...`) for tasks that Ansible can handle natively.
+**Issue**: Extensive use of `shell` and `command` modules with text processing (`grep`, `awk`, etc.) to obtain information that native Ansible modules or facts already provide in a more reliable and structured way.
+
+**Specific Examples:**
+- **Get service status (in `07_servicios.yml`):** The `serviciosrunning` and `serviciosFallidos` tasks execute `systemctl` and parse its output. This could be replaced by the `service_facts` module, which returns a structured list of all services and their state, eliminating the need for text processing.
+- **List updates (in `05_updates.yml`):** The `Lis` task runs `yum list updates`. The `yum` module itself can be used with the `list=updates` parameter to get this information programmatically and more safely.
+- **Check disk space (in `10_discos.yml`):** The `uso_disco` task runs `df -h`. Ansible already gathers this information automatically during `gather_facts` and stores it in the `ansible_mounts` variable. Using this fact is more efficient than running a new command.
+- **Certificate checking (in `08_seguridad.yml`):** The `find` command with `openssl` to check certificates could be replaced by the `community.crypto.x509_certificate_info` module, which retrieves the information in a structured manner.
+
 **Recommended Action**:
-- Use `yum`/`package` module to list updates.
-- Use `service`/`systemd_service` module to check services.
-- Use `mount` module to check mounts.
-- This makes the code more idempotent and less fragile to Linux command output changes.
+- Replace `shell` commands with native Ansible modules (`service_facts`, `yum`, `package_facts`, etc.) whenever possible.
+- Leverage Ansible facts (`ansible_mounts`, `ansible_default_ipv4`, etc.) instead of re-running commands that obtain the same information.
+- **Benefit**: This will make the role more idempotent, readable, faster (by reducing command executions), and less prone to breaking if the text format of a Linux command changes between versions.
 
 ## 4. Error Handling
-**Issue**: Frequent use of `ignore_errors: True` to handle `shell` command failures. This can mask real problems.
-**Recommended Action**: Implement more robust checks (`failed_when`, `changed_when`) and `block/rescue` blocks if necessary.
+**Issue**: The `ignore_errors: True` parameter is overused (over 40 instances) to prevent the playbook from failing. This practice can mask real problems (e.g., a command does not exist, a service fails for an unexpected reason) and makes debugging difficult.
+
+**Specific Examples:**
+- **File Checking (in `08_seguridad.yml`):** The "Fichero config" task runs an `ls` and, if it fails, prints an `echo` with HTML. It would be more robust to use the `stat` module to verify if the path exists. If it doesn't, a variable can be registered and used in the Jinja2 template to display the error, instead of generating HTML within the task itself.
+- **Connectivity Tests (in `07_servicios.yml`):** The tasks that use `curl` to check connectivity simply ignore failures. It is preferable to use the `uri` module, which allows for more granular control over the result (e.g., `failed_when: my_result.status_code != 200`) and does not depend on the `curl` command being installed.
+- **Data Collection (in `09_hardware.yml`):** The calls to `dmidecode` ignore errors. If `dmidecode` were not installed, the variables would be empty without any notification of the root cause. A better practice would be to check if the command exists first, or use a `block/rescue` to catch the error and register a clear message that can be displayed in the report.
+
+**Recommended Action**:
+- Limit the use of `ignore_errors: True` only to situations where a failure is fully expected and not relevant.
+- Use `failed_when` to define explicit failure conditions based on the return code or output of a command.
+- Use `block/rescue/always` blocks to manage errors in a controlled way, allowing cleanup tasks to run or specific error messages to be registered.
+- Use modules like `stat` to check preconditions (e.g., if a file exists) before running a command that depends on it.
 
 ## 5. Delegation
-**Issue**: Delegation to host `adgesasateinfc2` is written directly in tasks (`delegate_to: adgesasateinfc2`).
-**Recommended Action**: Define the management host as a variable (e.g., `delegate_to: "{{ reporting_host }}"`) to allow easy changing from the inventory.
+**Issue**: The delegate host name, `adgesasateinfc2`, is hardcoded in more than 20 tasks across multiple files, including `01_prechecks.yml`, `11_enriquecidos.yml`, `12_report.yml`, and `13_postchecks.yml`.
+
+**Recommended Action**:
+- Create a new variable in `roles/sgadprevio/vars/all_vars.yml`, for example: `reporting_host: adgesasateinfc2`.
+- Replace all instances of `delegate_to: adgesasateinfc2` with `delegate_to: "{{ reporting_host }}"`.
+- **Benefit**: This would allow the delegation host to be changed centrally in a single location, or even from the Ansible inventory, which dramatically increases the flexibility and reusability of the role in other environments.
 
 ## 6. HTML Generation
-**Issue**: Part of the HTML is generated by concatenating strings in `shell` and `echo` commands.
-**Recommended Action**: Move all presentation logic to Jinja2 templates (`templates/`) to separate data from presentation.
+**Issue**: In several tasks, HTML code is generated directly from the `shell` using `echo`, especially for displaying error messages. This mixes data collection logic with presentation logic.
+
+**Specific Example (from `08_seguridad.yml`):**
+```yaml
+- name: Fichero config
+  shell: ls ... || echo -e '<p style=color:red;>...NO CONFIGURATION...</p>'
+  register: etcconfigini
+  ignore_errors: True
+```
+In this case, the Ansible task is responsible for generating an HTML snippet. If you wanted to change the error style (e.g., use a CSS class instead of `style=color:red`), you would have to modify the Ansible task code, not the template.
+
+**Recommended Action**:
+- **Separate Logic and Presentation**: Ansible tasks should only collect data and register variables (e.g., `etcconfigini_found: false`).
+- **Move Presentation Logic to the Template**: The `cabecera.html.j2` template should be solely responsible for generating HTML. It should contain the logic to display the error based on the variables registered by the tasks.
+  ```jinja
+  {% if not etcconfigini_found %}
+    <p class="error-message">⚠️ NO CONFIGURATION for Fichero config.</p>
+  {% endif %}
+  ```
+- **Benefit**: This follows the principle of separation of concerns, making both the Ansible role and the HTML template much easier to maintain and modify independently.
