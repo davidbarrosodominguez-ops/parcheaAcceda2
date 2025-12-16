@@ -137,6 +137,8 @@ The `cabecera.html.j2` template is already set up to handle this logic. For exam
 *   **03_repos.yml**:
     *   `Repositorios disponibles`
     *   `release en satellite`
+*   **05_updates.yml**:
+    *   `paquetes obsoletos o sin reclamo`
 *   **06_red.yml**:
     *   `rutas ip r`
     *   `rutas route`

@@ -137,6 +137,8 @@ La plantilla `cabecera.html.j2` ya está preparada para manejar esta lógica. Po
 *   **03_repos.yml**:
     *   `Repositorios disponibles`
     *   `release en satellite`
+*   **05_updates.yml**:
+    *   `paquetes obsoletos o sin reclamo`
 *   **06_red.yml**:
     *   `rutas ip r`
     *   `rutas route`
