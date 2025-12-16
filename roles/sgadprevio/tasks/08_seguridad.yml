@@ -1,4 +1,4 @@
-# 09_seguridad.yml - PKI, sudoers, security checks
+# 08_seguridad.yml - PKI, sudoers, security checks
 
     - name: pkis pem x509
       shell: find  /etc/pki/ /etc/pki/ca-trust/ -name "*.pem" -exec sh -c 'echo dbd{}dbd && openssl x509 -in {} -noout -text ' \;| sed 's/dbd/<br>/g'
