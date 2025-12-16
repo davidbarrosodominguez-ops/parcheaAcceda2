@@ -8,9 +8,7 @@ El proyecto sigue una estructura estándar de Ansible, aunque con algunas partic
 
 - **`roles/`**: Contiene la lógica principal encapsulada en roles.
   - **`sgadprevio/`**: El rol principal que realiza todas las comprobaciones.
-- **`playbooks/`**: Contiene playbooks que orquestan la ejecución.
-
-- **`sgadprevio.yml`**: Un playbook "wrapper" o envoltorio que llama al rol `sgadprevio`.
+- **`sgadprevio.yml`**: El playbook principal en la raíz del proyecto que llama al rol `sgadprevio`.
 - **`docs/`**: Documentación del proyecto (este directorio).
 
 ## Flujo de Trabajo

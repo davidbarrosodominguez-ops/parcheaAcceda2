@@ -8,9 +8,7 @@ The project follows a standard Ansible structure with some specificities:
 
 - **`roles/`**: Contains the main logic encapsulated in roles.
   - **`sgadprevio/`**: The main role that performs all checks.
-- **`playbooks/`**: Contains playbooks that orchestrate execution.
-  - **`rhel_SGADprevioAcceda2.yml`**: A monolithic version of the audit logic.
-- **`sgadprevio.yml`**: A wrapper playbook that calls the `sgadprevio` role.
+- **`sgadprevio.yml`**: The main playbook in the project root that calls the `sgadprevio` role.
 - **`docs/`**: Project documentation (this directory).
 
 ## Workflow
