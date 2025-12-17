@@ -136,7 +136,11 @@ The `cabecera.html.j2` template is already set up to handle this logic. For exam
     *   `rutas route`
     *   `rutas all`
     *   `rutas nmcli`
+    *   `ficheros del red`
     *   `master slave`
+    *   `ficheros de red ifcfg`
+    *   `Ficheros de bond`
+    *   `Ficheros ifcfg`
     *   `revisa bootproto ifcfg-bond1`
 *   **07_servicios.yml**:
     *   `conectividad COMMVAULT-NG`
