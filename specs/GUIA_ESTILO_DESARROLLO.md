@@ -17,3 +17,4 @@ Este documento define el estándar de código y las mejores prácticas para desa
 
 ## Documentación
 - **Sincronización de Idiomas:** Toda la documentación generada (ficheros `.md`) debe mantenerse sincronizada en sus versiones en español e inglés. Cualquier cambio en un fichero debe ser replicado en su contraparte.
+- **Coherencia Tarea-Plantilla:** Cuando se modifique la tarea de un fichero `.yml` que afecte a la información reportada, se debe verificar que la modificación no afecta a su representación gráfica en el `.j2` correspondiente. Si es necesario, la plantilla `.j2` también debe ser modificada para mantener la coherencia.
