@@ -9,10 +9,13 @@
       register: serviciosFallidos
       ignore_errors: True
 
-    - name: Leer fichero /etc/hosts
-      ansible.builtin.slurp:
-        src: /etc/hosts
-      register: slurp_etc_hosts
+    - name: Fichero HOSTS
+      shell: cat -A /etc/hosts 
+      register: etchosts
+
+    - name: revisa hosts
+      shell: echo -e "$(cat -A /etc/hosts|grep -v ^#|grep -E '\^')"
+      register: etchostserror
 
     - name: conectividad COMMVAULT-NG
       shell: nc -vz   10.254.227.28  8400 --verbose && echo "CONEXIÓN CORRECTA A COMMVAULT-NG" || echo -e '<p style=color:red;>REVISAR_.._REVISAR</p>'
