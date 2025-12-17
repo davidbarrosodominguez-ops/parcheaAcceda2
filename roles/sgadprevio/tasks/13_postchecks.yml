@@ -31,8 +31,9 @@
       delegate_to: adgesasateinfc2
       register: copia_stat_result
 
-    - name: Genera aviso si la copia ha fallado
-      shell: echo -e '<p style=color:red;>REVISAR_La copia del informe final {{ item.item.src | basename }} al almacén ha fallado._REVISAR</p>'
+    - name: Registra los fallos en la copia de resultados
+      set_fact:
+        postcheck_copy_failed_files: "{{ postcheck_copy_failed_files | default([]) + [item.item.src | basename] }}"
       when: not item.stat.exists
       with_items: "{{ copia_stat_result.results }}"
       delegate_to: adgesasateinfc2
@@ -55,8 +56,9 @@
       delegate_to: adgesasateinfc2
       register: limpieza_stat_result
 
-    - name: Genera aviso si la limpieza ha fallado
-      shell: echo -e '<p style=color:red;>REVISAR_La limpieza del fichero temporal {{ item.item.src | basename }} ha fallado._REVISAR</p>'
+    - name: Registra los fallos en la limpieza de ficheros
+      set_fact:
+        postcheck_cleanup_failed_files: "{{ postcheck_cleanup_failed_files | default([]) + [item.item.src | basename] }}"
       when: item.stat.exists
       with_items: "{{ limpieza_stat_result.results }}"
       delegate_to: adgesasateinfc2

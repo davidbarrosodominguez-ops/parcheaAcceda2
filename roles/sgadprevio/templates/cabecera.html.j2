@@ -1217,6 +1217,28 @@
 			<div class="bg-white dark:bg-[#23272F] rounded shadow-lg p-8 border border-gray-200 dark:border-[#374151]">
 
                          <details class="group border border-gray-200 dark:border-gray-700 rounded mb-4 transition-colors"><summary>RESUMEN DE ADVERTENCIAS</summary>
+				{% if postcheck_copy_failed_files is defined and postcheck_copy_failed_files %}
+				<div style="color:red; font-weight:bold;">
+				    REVISAR_⚠️ ⚠️ Fallo al copiar los siguientes informes al almacén:
+				    <ul>
+				    {% for file in postcheck_copy_failed_files %}
+				        <li>{{ file }}</li>
+				    {% endfor %}
+				    </ul>
+				    _REVISAR
+				</div>
+				{% endif %}
+				{% if postcheck_cleanup_failed_files is defined and postcheck_cleanup_failed_files %}
+				<div style="color:red; font-weight:bold;">
+				    REVISAR_⚠️ ⚠️ Fallo al limpiar los siguientes ficheros temporales:
+				    <ul>
+				    {% for file in postcheck_cleanup_failed_files %}
+				        <li>{{ file }}</li>
+				    {% endfor %}
+				    </ul>
+				    _REVISAR
+				</div>
+				{% endif %}
 				<hr><p><pre>{{ resumen.stdout_lines|join('<br>') }}</pre></p></details><hr>
 			</div>
 	    </section>
