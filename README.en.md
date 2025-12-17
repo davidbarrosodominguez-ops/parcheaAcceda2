@@ -50,6 +50,17 @@ The main logic resides in the `sgadprevio` role and is divided into the followin
 - **`12_report.yml`**: Generates the HTML/CSV reports and sends the email. **(Runs on the delegate node)**.
 - **`13_postchecks.yml`**: Performs post-execution cleanup tasks.
 
+## Architectural Principle: Separation of Logic and Presentation
+
+A fundamental principle of this project is to separate logic from presentation:
+
+- **Ansible Tasks (*.yml)**: Their sole responsibility is to execute commands, gather data, and register the results into variables (using `register` or `set_fact`). Tasks should not generate HTML or user-facing messages.
+
+- **Templates (*.j2)**: Their sole responsibility is presentation. They read the variables registered by the tasks and use them to generate the final HTML report, including error or warning messages (`REVISAR_...`).
+
+**Practical Rule**: If you modify a task in a `.yml` file that affects the information in the report, you must review and, if necessary, update the corresponding `.j2` file to ensure consistent graphical representation.
+
+
 ## Configuration and Dependencies
 - **Execution User**: The playbook runs as the `reexus` user on remote hosts.
 - **Delegate Node**: `adgesasateinfc2` must be accessible from the Ansible control node. It is used to centralize report generation and email dispatch.

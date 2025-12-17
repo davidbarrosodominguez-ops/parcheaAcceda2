@@ -56,6 +56,16 @@ El informe generado debe recopilar, como mínimo, la siguiente información (seg
 17. Estado del servicio de sincronización horaria.
 
 
+## 4. Arquitectura: Separación de Lógica y Presentación
+
+Es un principio fundamental de este proyecto separar la lógica de la presentación:
+
+- **Tareas de Ansible (*.yml)**: Su única responsabilidad es ejecutar comandos, recopilar datos y registrar los resultados en variables (usando `register` o `set_fact`). Las tareas no deben generar HTML ni mensajes de cara al usuario final.
+
+- **Plantillas (*.j2)**: Su única responsabilidad es la presentación. Leen las variables registradas por las tareas y las usan para generar el informe HTML final, incluyendo los mensajes de error o advertencia (`REVISAR_...`).
+
+**Regla práctica**: Si modificas una tarea en un fichero `.yml` que afecta a la información del informe, debes revisar y, si es necesario, actualizar el fichero `.j2` correspondiente para asegurar que la representación gráfica sea coherente.
+
 ## 5. Objetivo de Refactorización (Rol de Gemini)
 
 Según la última instrucción, el rol principal de Gemini en este proyecto es asistir en la **refactorización y mejora** del código. Los objetivos son:
