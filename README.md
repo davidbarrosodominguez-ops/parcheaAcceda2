@@ -68,3 +68,13 @@ ansible-playbook sgadprevio.yml -i your_inventory_file
 ## Salidas Generadas
 - **Informe HTML**: Un fichero detallado (`rhel_previo_{{ ansible_hostname }}_{...}.html`) con toda la información recopilada. Se genera a partir de la plantilla `templates/cabecera.html.j2`.
 - **Informe CSV**: Un fichero resumen con los puntos clave de la auditoría.
+
+## Principio Arquitectónico: Separación de Lógica y Presentación
+
+Un principio fundamental de este proyecto es separar la lógica de la presentación:
+
+- **Tareas de Ansible (*.yml)**: Su única responsabilidad es ejecutar comandos, recopilar datos y registrar los resultados en variables (usando `register` o `set_fact`). Las tareas no deben generar HTML ni mensajes orientados al usuario.
+
+- **Plantillas (*.j2)**: Su única responsabilidad es la presentación. Leen las variables registradas por las tareas y las utilizan para generar el informe HTML final, incluidos los mensajes de error o advertencia (`REVISAR_...`).
+
+**Regla Práctica**: Si modifica una tarea en un archivo `.yml` que afecta la información del informe, debe revisar y, si es necesario, actualizar el archivo `.j2` correspondiente para garantizar una representación gráfica coherente.
