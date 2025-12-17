@@ -2,9 +2,9 @@
 
 Este documento detalla áreas de mejora identificadas en el código actual para facilitar su mantenimiento, legibilidad y robustez.
 
-## 1. Eliminación de Duplicación
-**Problema**: Existe una duplicación casi total entre el rol `sgadprevio` y el playbook `playbooks/rhel_SGADprevioAcceda2.yml`.
-**Acción Recomendada**: Eliminar o archivar `playbooks/rhel_SGADprevioAcceda2.yml`. Usar exclusivamente `sgadprevio.yml`, que invoca al rol.
+## 1. Eliminación de Duplicación (Refactorizado)
+**Estado**: Esta refactorización ha sido completada.
+**Detalles**: El playbook `playbooks/rhel_SGADprevioAcceda2.yml`, que causaba duplicación con el rol `sgadprevio`, ha sido eliminado o archivado. Ahora se utiliza exclusivamente `sgadprevio.yml`, que invoca al rol.
 
 ## 2. Gestión de Rutas y Variables
 **Problema**: Existen múltiples rutas y nombres de fichero definidos directamente en los ficheros de tareas y en el playbook principal, lo que dificulta la adaptación del rol a diferentes entornos.
