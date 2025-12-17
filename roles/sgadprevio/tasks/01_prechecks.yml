@@ -6,7 +6,7 @@
         path: "{{ fichero }}"
         owner: reexus
         group: reexus
-      delegate_to: adgesasateinfc2
+      delegate_to: "{{ reporting_host }}"
     
     - name: Crea ficheros temporales
       file:
@@ -15,6 +15,7 @@
         owner: reexus
         group: reexus
         mode: '0664'
+      delegate_to: "{{ reporting_host }}"
       with_items: 
         - "{{ fich1 }}"
         - "{{ fich2 }}"

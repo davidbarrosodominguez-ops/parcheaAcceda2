@@ -14,6 +14,7 @@ subscription_release: 8.10
 ansible_user: reexus
 ansible_group: reexus
 ansible_file_mode: '0664'
+reporting_host: adgesasateinfc2
  
 # Variables adicionales registradas en el playbook
 

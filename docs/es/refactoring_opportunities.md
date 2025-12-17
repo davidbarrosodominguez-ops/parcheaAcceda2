@@ -49,13 +49,7 @@ Este documento detalla áreas de mejora identificadas en el código actual para 
 - Usar bloques `block/rescue/always` para gestionar errores de forma controlada, permitiendo ejecutar tareas de limpieza o registrar mensajes de error específicos.
 - Utilizar módulos como `stat` para comprobar precondiciones (ej: si un fichero existe) antes de ejecutar un comando que dependa de él.
 
-## 5. Delegación
-**Problema**: El nombre del host de delegación, `adgesasateinfc2`, está hardcodeado en más de 20 tareas a lo largo de múltiples ficheros, incluyendo `01_prechecks.yml`, `11_enriquecidos.yml`, `12_report.yml` y `13_postchecks.yml`.
 
-**Acción Recomendada**:
-- Crear una nueva variable en `roles/sgadprevio/vars/all_vars.yml`, por ejemplo: `reporting_host: adgesasateinfc2`.
-- Reemplazar todas las instancias de `delegate_to: adgesasateinfc2` por `delegate_to: "{{ reporting_host }}"`.
-- **Beneficio**: Esto permitiría cambiar el host de delegación de forma centralizada en un solo lugar, o incluso desde el inventario de Ansible, lo que incrementa drásticamente la flexibilidad y reutilización del rol en otros entornos.
 
 ## 6. Generación de HTML
 **Problema**: En varias tareas se genera código HTML directamente desde el `shell` usando `echo`, especialmente para mostrar mensajes de error. Esto mezcla la lógica de recopilación de datos con la lógica de presentación.

@@ -2,7 +2,7 @@
     - name: fecha de parcheado inicial del ciclo
       shell: echo -e "$(grep -ih {{ ansible_hostname }}.gest.2001.nubesara.es /home/reexus/enriquece/paraenriquecerParchea.lst | awk '{print $(NF-2)}' )" 
       register: fechaparcheado
-      delegate_to: adgesasateinfc2
+      delegate_to: "{{ reporting_host }}"
       ignore_errors: True
 
 #    - name: Asignar enriquece datos
@@ -14,19 +14,19 @@
     - name: Fechas de parcheado
       shell: echo -e "$(/bin/python3 /home/reexus/Acceda2/fechas_parcheado.py {{ fechaparcheado.stdout }} 6 | sort -u )"
       register: fechas_parcheado
-      delegate_to: adgesasateinfc2
+      delegate_to: "{{ reporting_host }}"
       ignore_errors: True
 
     - name: contacto
       shell: echo  "$(grep -ih {{ ansible_hostname }} /home/reexus/enriquece/paraenriquecerParchea.lst |awk '{print $NF}')"
       register: contacto
-      delegate_to: adgesasateinfc2
+      delegate_to: "{{ reporting_host }}"
       ignore_errors: True
 
     - name: Aplicacion 
       shell: echo -e $(grep -ih {{ ansible_hostname }} /home/reexus/enriquece/paraenriquecerParchea.lst |awk '{print $(NF-1)}')
       register: aplicacion
-      delegate_to: adgesasateinfc2
+      delegate_to: "{{ reporting_host }}"
       ignore_errors: True
 
     - name: procesos de aplicacion {{ aplicacion.stdout }}

@@ -3,7 +3,7 @@
       slurp:
         src:  "/home/reexus/LOGO_GOB_MTDFP_AEAD.png"
       register: logo
-      delegate_to: adgesasateinfc2
+      delegate_to: "{{ reporting_host }}"
 
 
 
@@ -11,17 +11,17 @@
       template:
         src: "/home/reexus/parcheaAcceda2/parcheaAcceda2/roles/sgadprevio/templates/cabecera.html.j2"
         dest: "{{ fichero }}"
-      delegate_to: adgesasateinfc2
+      delegate_to: "{{ reporting_host }}"
 
     - name: revisiones
       shell: echo -e "$(grep 'REVISAR_' {{ fichero }}   | sed 's/.*REVISAR_/REVISAR_/g'|sed 's/_REVISAR.*/_REVISAR/g')"
       register: revisiones
-      delegate_to: adgesasateinfc2
+      delegate_to: "{{ reporting_host }}"
 
 
     - name: tratarevisiones
-      shell: sed -i '/<\/body>/i<div><p>{{revisiones.stdout_lines| join("<br>")}}</p></div>'  {{ fichero }}
-      delegate_to: adgesasateinfc2
+      shell: sed -i '/</body>/i<div><p>{{revisiones.stdout_lines| join("<br>")}}</p></div>'  {{ fichero }}
+      delegate_to: "{{ reporting_host }}"
 
 
     - name: cabecera csv
@@ -33,7 +33,7 @@
                  2ª FECHA DE PARCHEADO ;3ª FECHA DE PARCHEADO ;4ª FECHA DE PARCHEADO ; ;
                  \n"
         dest: "/home/reexus/Acceda2/SGADprevio/rhel_previo_{{ ansible_hostname }}_{{ ansible_distribution_version }}_{{ ansible_date_time.date }}.csv"
-      delegate_to: adgesasateinfc2
+      delegate_to: "{{ reporting_host }}"
 
 
 
@@ -54,7 +54,7 @@
                       $(echo  {{ fechas_parcheado.stdout_lines[2:3]}} | tr ',' ';');
                       $(echo  {{ fechas_parcheado.stdout_lines[3:4]}} | tr ',' ';');
                       \n " >> "{{ fichero }}.csv"
-      delegate_to: adgesasateinfc2
+      delegate_to: "{{ reporting_host }}"
       ignore_errors: True
 
 
@@ -97,6 +97,6 @@
         echo " "
         echo "--boundary42--"
         ) | sendmail  -t "david.bdominguez@externos.correo.gob.es"
-      delegate_to: adgesasateinfc2
+      delegate_to: "{{ reporting_host }}"
       
        # "david.bdominguez@externos.correo.gob.es;cristina.cuenca@externos.correo.gob.es;aida.suarez@externos.correo.gob.es" 

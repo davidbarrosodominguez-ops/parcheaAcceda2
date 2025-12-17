@@ -17,10 +17,7 @@
           dest: "/home/reexus/Acceda2/SGADprevio/almacen/"
           owner: reexus
           group: reexus
-      with_items:
-            - src: "/home/reexus/Acceda2/SGADprevio/rhel_previo_{{ ansible_hostname }}_{{ ansible_distribution_version }}_{{ ansible_date_time.date }}.html"
-            - src: "/home/reexus/Acceda2/SGADprevio/rhel_previo_{{ ansible_hostname }}_{{ ansible_distribution_version }}_{{ ansible_date_time.date }}.csv"
-      delegate_to: adgesasateinfc2
+      delegate_to: "{{ reporting_host }}"
 
     - name: Valida copia de resultados
       stat:
@@ -28,7 +25,7 @@
       with_items:
             - src: "/home/reexus/Acceda2/SGADprevio/rhel_previo_{{ ansible_hostname }}_{{ ansible_distribution_version }}_{{ ansible_date_time.date }}.html"
             - src: "/home/reexus/Acceda2/SGADprevio/rhel_previo_{{ ansible_hostname }}_{{ ansible_distribution_version }}_{{ ansible_date_time.date }}.csv"
-      delegate_to: adgesasateinfc2
+      delegate_to: "{{ reporting_host }}"
       register: copia_stat_result
 
     - name: Registra los fallos en la copia de resultados
@@ -36,7 +33,7 @@
         postcheck_copy_failed_files: "{{ postcheck_copy_failed_files | default([]) + [item.item.src | basename] }}"
       when: not item.stat.exists
       with_items: "{{ copia_stat_result.results }}"
-      delegate_to: adgesasateinfc2
+      delegate_to: "{{ reporting_host }}"
 
     - name: Elimina ficheros temporales
       file:
@@ -45,7 +42,7 @@
       with_items:
             - src: "/home/reexus/Acceda2/SGADprevio/rhel_previo_{{ ansible_hostname }}_{{ ansible_distribution_version }}_{{ ansible_date_time.date }}.html"
             - src: "/home/reexus/Acceda2/SGADprevio/rhel_previo_{{ ansible_hostname }}_{{ ansible_distribution_version }}_{{ ansible_date_time.date }}.csv"
-      delegate_to: adgesasateinfc2
+      delegate_to: "{{ reporting_host }}"
 
     - name: Valida limpieza de ficheros temporales
       stat:
@@ -53,7 +50,7 @@
       with_items:
             - src: "/home/reexus/Acceda2/SGADprevio/rhel_previo_{{ ansible_hostname }}_{{ ansible_distribution_version }}_{{ ansible_date_time.date }}.html"
             - src: "/home/reexus/Acceda2/SGADprevio/rhel_previo_{{ ansible_hostname }}_{{ ansible_distribution_version }}_{{ ansible_date_time.date }}.csv"
-      delegate_to: adgesasateinfc2
+      delegate_to: "{{ reporting_host }}"
       register: limpieza_stat_result
 
     - name: Registra los fallos en la limpieza de ficheros
@@ -61,5 +58,5 @@
         postcheck_cleanup_failed_files: "{{ postcheck_cleanup_failed_files | default([]) + [item.item.src | basename] }}"
       when: item.stat.exists
       with_items: "{{ limpieza_stat_result.results }}"
-      delegate_to: adgesasateinfc2
+      delegate_to: "{{ reporting_host }}"
 ...
