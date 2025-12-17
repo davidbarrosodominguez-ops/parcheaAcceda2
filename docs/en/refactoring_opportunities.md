@@ -151,13 +151,12 @@ The `cabecera.html.j2` template is already set up to handle this logic. For exam
     *   `Configuracion commvault`
     *   `status de RHC`
     *   `Fichero HOSTS` and `revisa hosts`:
-        *   **Status**: Pending.
-        *   **Description**: Currently, two tasks use `shell`, `cat -A`, and `grep` to read the `/etc/hosts` file and search for strange characters.
-        *   **Proposed Solution**:
-            1.  Replace both tasks with a single one using the `ansible.builtin.slurp` module to read the raw content of `/etc/hosts`.
-            2.  Move the display logic (simulating `cat -A`) and validation logic (searching for characters like `\r`) to the `cabecera.html.j2` template.
-            3.  In the template, use `b64decode` to decode the content, `replace` to visualize special characters, and a loop with an `if '\r' in linea` condition to detect and warn about problematic lines.
-        *   **Benefit**: Centralizes presentation logic in the template, removes dependency on `cat -A` and `grep`, and uses a more efficient Ansible module.
+        *   **Status**: ✅ Completed.
+        *   **Description**: Two tasks with `shell` were used to read `/etc/hosts`.
+        *   **Applied Solution**:
+            1.  Both tasks were replaced with a single one using the `ansible.builtin.slurp` module to read `/etc/hosts` and register the result in `slurp_etc_hosts`.
+            2.  All presentation and validation logic was moved to the `cabecera.html.j2` template, which now decodes the content, simulates `cat -A`, and checks for `\r` characters to display a warning.
+        *   **Benefit**: Centralized presentation logic in the template, eliminated `shell` usage, and now uses a more efficient native Ansible module.
 *   **08_seguridad.yml**:
     *   `Fichero config`
     *   `configuracion de dominio`

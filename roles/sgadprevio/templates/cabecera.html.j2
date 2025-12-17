@@ -967,9 +967,48 @@
                                 <p style=color:red;><table class="min-w-full rounded" border='1'> ⚠️CARACTERES{{ pkiCRTx509.stderr }}</p></table></details>
 <!--  Section -->
 
-                <h3 id="FICHEROS DE HOSTS"></h3><details class="group border border-gray-200 dark:border-gray-700 rounded mb-4 transition-colors"><summary>FICHERO HOSTS</summary>
-				<p><table class="min-w-full rounded" border='1'>{{ etchosts.stdout_lines |join('<br>')}}</table></p>
-				<p style=color:red;><table class="min-w-full rounded" border='1'> ⚠️CARACTERES{{ etchostserror.stdout}}</p></table></details>
+                <h3 id="FICHEROS DE HOSTS"></h3>
+                <details class="group border border-gray-200 dark:border-gray-700 rounded mb-4 transition-colors">
+                    <summary>FICHERO HOSTS</summary>
+                    {% if slurp_etc_hosts is defined and slurp_etc_hosts.content %}
+                        {% set hosts_content = slurp_etc_hosts.content | b64decode %}
+                        {% set hosts_lines = hosts_content.split('\n') %}
+                        
+                        <div class="mono bg-gray-50 dark:bg-gray-800 p-4 rounded mt-4">
+                            <pre class="whitespace-pre-wrap break-words">
+{% for line in hosts_lines %}{{ line.replace('\t', '^I') + '$\n' }}{% endfor %}
+                            </pre>
+                        </div>
+
+                        {% set problematic_lines = [] %}
+                        {% for line in hosts_lines %}
+                            {% if '\r' in line %}
+                                {% set _ = problematic_lines.append(line) %}
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if problematic_lines %}
+                            <div class="mt-4 p-4 border-l-4 border-red-500 bg-red-100 dark:bg-red-900/20">
+                                <p class="font-bold text-red-700 dark:text-red-300">⚠️ CARACTERES INESPERADOS DETECTADOS</p>
+                                <p class="text-red-600 dark:text-red-400 mt-2">Se encontraron retornos de carro (CR), que pueden causar problemas. Revise las siguientes líneas en /etc/hosts:</p>
+                                <ul class="list-disc list-inside mt-2 mono text-sm">
+                                {% for line in problematic_lines %}
+                                    <li>{{ line | replace('\r', '^M') }}</li>
+                                {% endfor %}
+                                </ul>
+                            </div>
+                        {% else %}
+                            <div class="mt-4 p-4 border-l-4 border-green-500 bg-green-100 dark:bg-green-900/20">
+                                <p class="font-bold text-green-700 dark:text-green-300">✔ Fichero /etc/hosts sin caracteres inesperados.</p>
+                            </div>
+                        {% endif %}
+
+                    {% else %}
+                        <div class="mt-4 p-4 border-l-4 border-yellow-500 bg-yellow-100 dark:bg-yellow-900/20">
+                            <p class="font-bold text-yellow-700 dark:text-yellow-300">No se pudo leer el fichero /etc/hosts.</p>
+                        </div>
+                    {% endif %}
+                </details>
 <!--  Section  -->
 
                 <h3 id="FICHEROS FSTAB"></h3><details class="group border border-gray-200 dark:border-gray-700 rounded mb-4 transition-colors"><summary>FICHERO FSTAB</summary>
