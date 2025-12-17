@@ -22,6 +22,21 @@
             - src: "/home/reexus/Acceda2/SGADprevio/rhel_previo_{{ ansible_hostname }}_{{ ansible_distribution_version }}_{{ ansible_date_time.date }}.csv"
       delegate_to: adgesasateinfc2
 
+    - name: Valida copia de resultados
+      stat:
+        path: "/home/reexus/Acceda2/SGADprevio/almacen/{{ item.src | basename }}"
+      with_items:
+            - src: "/home/reexus/Acceda2/SGADprevio/rhel_previo_{{ ansible_hostname }}_{{ ansible_distribution_version }}_{{ ansible_date_time.date }}.html"
+            - src: "/home/reexus/Acceda2/SGADprevio/rhel_previo_{{ ansible_hostname }}_{{ ansible_distribution_version }}_{{ ansible_date_time.date }}.csv"
+      delegate_to: adgesasateinfc2
+      register: copia_stat_result
+
+    - name: Genera aviso si la copia ha fallado
+      shell: echo -e '<p style=color:red;>REVISAR_La copia del informe final {{ item.item.src | basename }} al almacén ha fallado._REVISAR</p>'
+      when: not item.stat.exists
+      with_items: "{{ copia_stat_result.results }}"
+      delegate_to: adgesasateinfc2
+
     - name: Elimina ficheros temporales
       file:
         path: "{{ item.src }}"
@@ -29,5 +44,20 @@
       with_items:
             - src: "/home/reexus/Acceda2/SGADprevio/rhel_previo_{{ ansible_hostname }}_{{ ansible_distribution_version }}_{{ ansible_date_time.date }}.html"
             - src: "/home/reexus/Acceda2/SGADprevio/rhel_previo_{{ ansible_hostname }}_{{ ansible_distribution_version }}_{{ ansible_date_time.date }}.csv"
+      delegate_to: adgesasateinfc2
+
+    - name: Valida limpieza de ficheros temporales
+      stat:
+        path: "{{ item.src }}"
+      with_items:
+            - src: "/home/reexus/Acceda2/SGADprevio/rhel_previo_{{ ansible_hostname }}_{{ ansible_distribution_version }}_{{ ansible_date_time.date }}.html"
+            - src: "/home/reexus/Acceda2/SGADprevio/rhel_previo_{{ ansible_hostname }}_{{ ansible_distribution_version }}_{{ ansible_date_time.date }}.csv"
+      delegate_to: adgesasateinfc2
+      register: limpieza_stat_result
+
+    - name: Genera aviso si la limpieza ha fallado
+      shell: echo -e '<p style=color:red;>REVISAR_La limpieza del fichero temporal {{ item.item.src | basename }} ha fallado._REVISAR</p>'
+      when: item.stat.exists
+      with_items: "{{ limpieza_stat_result.results }}"
       delegate_to: adgesasateinfc2
 ...
