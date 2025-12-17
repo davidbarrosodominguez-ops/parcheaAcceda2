@@ -1140,9 +1140,43 @@
 <!--  Section  -->
 
                     <h3 id="MONTAJE"></h3><details class="group border border-gray-200 dark:border-gray-700 rounded mb-4 transition-colors">
-                    <summary>MONTAJE</summary>
+                    <summary>MONTAJE (old)</summary>
 				        <table class="min-w-full rounded" border='1'>
 					{{ fsmount.stdout_lines|join('<br>') }}</table></details>
+
+                    <h3 id="MONTAJE (new)"></h3><details class="group border border-gray-200 dark:border-gray-700 rounded mb-4 transition-colors">
+                    <summary>MONTAJE (new)</summary>
+                        <table class="min-w-full rounded" border='1'>
+                            <thead>
+                                <tr>
+                                    <th>Mount</th>
+                                    <th>Device</th>
+                                    <th>Type</th>
+                                    <th>Size</th>
+                                    <th>Available</th>
+                                    <th>Used %</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% if fsmount_new is defined %}
+                            {% for mount in fsmount_new %}
+                                <tr>
+                                    <td>{{ mount.mount }}</td>
+                                    <td>{{ mount.device }}</td>
+                                    <td>{{ mount.fstype }}</td>
+                                    <td>{{ (mount.size_total / 1024 / 1024 / 1024) | round(2) }} GB</td>
+                                    <td>{{ (mount.size_available / 1024 / 1024 / 1024) | round(2) }} GB</td>
+                                    <td>{{ ((mount.size_total - mount.size_available) / mount.size_total * 100) | round(2) }}%</td>
+                                </tr>
+                            {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="6">Variable fsmount_new is not defined.</td>
+                                </tr>
+                            {% endif %}
+                            </tbody>
+                        </table>
+                    </details>
 <!--  Section  -->
 
                     <h3 id="USO OPT DE APLICACIÓN {{ aplicacion.stdout }}"></h3>

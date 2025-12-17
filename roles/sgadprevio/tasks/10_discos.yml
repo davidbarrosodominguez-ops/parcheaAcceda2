@@ -7,9 +7,13 @@
       changed_when: false
       failed_when: false
 
-    - name: MONTAJE DISCOS
+    - name: MONTAJE DISCOS (old)
       shell: mount -a && mount  | awk 'NR==1{print "<tr><th>" $1 "</th><th>" $2 "</th><th>" $3 "</th><th>" $4 "</th></tr>" $5 "</th><th>" $6 "</th><th>"} NR>1{print "<tr><td>" $1 "</td><td>" $2 "</td><td>" $3 "</td><td>" $4 "</td></tr>" $5 "</td></tr>" $6 "</td></tr>" $7 "</td></tr>"}' || echo -e '<p style=color:red;>⚠️ ⚠️REVISAR_ NO SE PUEDEN OBTENER LOS DATOS DE MONTAJE_REVISAR</p>'
       register: fsmount
+
+    - name: MONTAJE DISCOS (new)
+      set_fact:
+        fsmount_new: "{{ ansible_mounts }}"
 
     - name: IDENTIFICACION DISCOS
       shell: echo -e "<p>$(blkid)</p><br><hr><p>$(lsblk --list --all)</p><hr><p>$(nfsstat -m all)</p><br>"
