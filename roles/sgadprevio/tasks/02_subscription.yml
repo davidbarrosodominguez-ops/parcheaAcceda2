@@ -27,14 +27,14 @@
 
     - name: Imprime si hay updates
       shell: echo  -e "<hr><br>{{ hayupdates }}<br><hr>" | sed -e 's/.*msg.*\[/ /g'|sed -e 's/.*<h1>/<h1> /g'|sed -e 's/<\/h1>.*/<\/h1> /g' | grep -v skip_reason|sed 's/msg*:/ /g'  >> "{{ fichero }}"
-      delegate_to: adgesasateinfc2
+      delegate_to: "{{ reporting_host }}"
       when: paquetes.stdout | int > 6
       ignore_errors: True
 
     - name: Imprime si hay cambio de release
       shell: echo  "<hr><br><h1>No hay actualizaciones disponibles en su release {{ ansible_distribution_version }},asignamos un release superior:{{ versionfutura.stdout }} paquetes:{{ paquetes.stdout }}</h1><br><hr>"   
       when: paquetes.stdout | int < 6 
-      delegate_to: adgesasateinfc2
+      delegate_to: "{{ reporting_host }}"
       register: cambiorelease
 
 
@@ -59,12 +59,12 @@
 
     - name: Imprime si hay updates
       shell: echo  "<br>{{ hayupdates }}<br><hr>"| grep -v skip_reason | sed 's/.*msg.*\[/ /g'|sed 's/.*<h1>/<h1> /g'|sed 's/<\/h1>.*/<\/h1> /g'  >> "{{ fichero }}" 
-      delegate_to: adgesasateinfc2
+      delegate_to: "{{ reporting_host }}"
 
     - name: Imprime si hay cambio de release
       shell: echo  "<br><h1>No hay actualizaciones disponibles en su release {{ ansible_distribution_version }} ,asignamos un release superior:{{ versionfutura.stdout }}</h1><br><hr>"  >> "{{ fichero }}"
       when: paquetes.stdout | int < 6  
-      delegate_to: adgesasateinfc2
+      delegate_to: "{{ reporting_host }}"
       ignore_errors: True
 
     - name: exclusiones aplicadas a {{ ansible_hostname }}

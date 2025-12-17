@@ -50,6 +50,11 @@ Este documento detalla áreas de mejora identificadas en el código actual para 
 - Utilizar módulos como `stat` para comprobar precondiciones (ej: si un fichero existe) antes de ejecutar un comando que dependa de él.
 
 
+## 5. Delegación (Refactorizado)
+**Estado**: Esta refactorización ha sido completada.
+**Problema**: El nombre del host de delegación, `adgesasateinfc2`, estaba hardcodeado en múltiples tareas.
+**Solución**: Se ha creado una variable `reporting_host` en `roles/sgadprevio/vars/all_vars.yml` y se han reemplazado todas las instancias de `delegate_to: adgesasateinfc2` por `delegate_to: "{{ reporting_host }}"`. Esto centraliza la configuración y mejora la reutilización del rol.
+
 
 ## 6. Generación de HTML
 **Problema**: En varias tareas se genera código HTML directamente desde el `shell` usando `echo`, especialmente para mostrar mensajes de error. Esto mezcla la lógica de recopilación de datos con la lógica de presentación.
@@ -61,7 +66,8 @@ Este documento detalla áreas de mejora identificadas en el código actual para 
   register: etcconfigini
   ignore_errors: True
 ```
-En este caso, la tarea de Ansible es responsable de generar un fragmento de HTML. Si se quisiera cambiar el estilo del error (e.g., usar una clase CSS en vez de `style=color:red`), habría que modificar el código de la tarea de Ansible, no la plantilla.
+En este caso, la tarea de Ansible es responsable de generar un fragmento de HTML. Si se quisiera cambiar el estilo del error (e.g., usar una clase CSS en vez de `style=color:red`), habría que modificar el código de la tarea de Ansible, no la plantilla.o pasar el aviso a la plantilla.
+
 
 **Acción Recomendada**:
 - **Separar Lógica y Presentación**: Las tareas de Ansible solo deben recopilar datos y registrar variables (e.g., `etcconfigini_found: false`).

@@ -51,13 +51,10 @@ This document details areas for improvement identified in the current code to fa
 - Use `block/rescue/always` blocks to manage errors in a controlled way, allowing cleanup tasks to run or specific error messages to be registered.
 - Use modules like `stat` to check preconditions (e.g., if a file exists) before running a command that depends on it.
 
-## 5. Delegation
-**Issue**: The delegate host name, `adgesasateinfc2`, is hardcoded in more than 20 tasks across multiple files, including `01_prechecks.yml`, `11_enriquecidos.yml`, `12_report.yml`, and `13_postchecks.yml`.
-
-**Recommended Action**:
-- Create a new variable in `roles/sgadprevio/vars/all_vars.yml`, for example: `reporting_host: adgesasateinfc2`.
-- Replace all instances of `delegate_to: adgesasateinfc2` with `delegate_to: "{{ reporting_host }}"`.
-- **Benefit**: This would allow the delegation host to be changed centrally in a single location, or even from the Ansible inventory, which dramatically increases the flexibility and reusability of the role in other environments.
+## 5. Delegation (Refactored)
+**Status**: This refactoring has been completed.
+**Issue**: The delegate host name, `adgesasateinfc2`, was hardcoded in multiple tasks.
+**Solution**: A `reporting_host` variable has been created in `roles/sgadprevio/vars/all_vars.yml` and all instances of `delegate_to: adgesasateinfc2` have been replaced with `delegate_to: "{{ reporting_host }}"`. This centralizes the configuration and improves the reusability of the role.
 
 ## 6. HTML Generation
 **Issue**: In several tasks, HTML code is generated directly from the `shell` using `echo`, especially for displaying error messages. This mixes data collection logic with presentation logic.
