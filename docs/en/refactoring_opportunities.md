@@ -51,11 +51,6 @@ This document details areas for improvement identified in the current code to fa
 - Use `block/rescue/always` blocks to manage errors in a controlled way, allowing cleanup tasks to run or specific error messages to be registered.
 - Use modules like `stat` to check preconditions (e.g., if a file exists) before running a command that depends on it.
 
-## 5. Delegation (Refactored)
-**Status**: This refactoring has been completed.
-**Issue**: The delegate host name, `adgesasateinfc2`, was hardcoded in multiple tasks.
-**Solution**: A `reporting_host` variable has been created in `roles/sgadprevio/vars/all_vars.yml` and all instances of `delegate_to: adgesasateinfc2` have been replaced with `delegate_to: "{{ reporting_host }}"`. This centralizes the configuration and improves the reusability of the role.
-
 ## 6. HTML Generation
 **Issue**: In several tasks, HTML code is generated directly from the `shell` using `echo`, especially for displaying error messages. This mixes data collection logic with presentation logic.
 

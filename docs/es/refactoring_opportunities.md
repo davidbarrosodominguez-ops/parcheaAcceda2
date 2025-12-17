@@ -50,12 +50,6 @@ Este documento detalla áreas de mejora identificadas en el código actual para 
 - Utilizar módulos como `stat` para comprobar precondiciones (ej: si un fichero existe) antes de ejecutar un comando que dependa de él.
 
 
-## 5. Delegación (Refactorizado)
-**Estado**: Esta refactorización ha sido completada.
-**Problema**: El nombre del host de delegación, `adgesasateinfc2`, estaba hardcodeado en múltiples tareas.
-**Solución**: Se ha creado una variable `reporting_host` en `roles/sgadprevio/vars/all_vars.yml` y se han reemplazado todas las instancias de `delegate_to: adgesasateinfc2` por `delegate_to: "{{ reporting_host }}"`. Esto centraliza la configuración y mejora la reutilización del rol.
-
-
 ## 6. Generación de HTML
 **Problema**: En varias tareas se genera código HTML directamente desde el `shell` usando `echo`, especialmente para mostrar mensajes de error. Esto mezcla la lógica de recopilación de datos con la lógica de presentación.
 
