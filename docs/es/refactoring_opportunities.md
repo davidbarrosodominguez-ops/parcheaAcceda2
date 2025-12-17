@@ -150,7 +150,10 @@ La plantilla `cabecera.html.j2` ya está preparada para manejar esta lógica. Po
     *   `Fichero config`
     *   `configuracion de dominio`
 *   **10_discos.yml**:
-    *   `MONTAJE DISCOS`
+    *   `MONTAJE DISCOS`:
+        *   **Estado**: En progreso.
+        *   **Descripción**: La tarea `MONTAJE DISCOS` ha sido duplicada. La versión `(new)` utiliza `ansible_facts` y la `(old)` mantiene el `shell`.
+        *   **Acción pendiente**: Tras validar el informe con la nueva implementación, se debe eliminar la tarea `MONTAJE DISCOS (old)` y la sección correspondiente en la plantilla.
 *   **11_enriquecidos.yml**:
     *   `procesos de aplicacion`
     *   `log de aplicacion`

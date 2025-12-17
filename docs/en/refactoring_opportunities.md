@@ -150,7 +150,10 @@ The `cabecera.html.j2` template is already set up to handle this logic. For exam
     *   `Fichero config`
     *   `configuracion de dominio`
 *   **10_discos.yml**:
-    *   `MONTAJE DISCOS`
+    *   `MONTAJE DISCOS`:
+        *   **Status**: In progress.
+        *   **Description**: The `MONTAJE DISCOS` task has been duplicated. The `(new)` version uses `ansible_facts`, and the `(old)` version keeps using `shell`.
+        *   **Pending action**: After validating the report with the new implementation, the `MONTAJE DISCOS (old)` task and its corresponding section in the template must be deleted.
 *   **11_enriquecidos.yml**:
     *   `procesos de aplicacion`
     *   `log de aplicacion`
