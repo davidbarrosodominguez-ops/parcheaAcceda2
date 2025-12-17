@@ -150,6 +150,14 @@ La plantilla `cabecera.html.j2` ya está preparada para manejar esta lógica. Po
     *   `chronyd`
     *   `Configuracion commvault`
     *   `status de RHC`
+    *   `Fichero HOSTS` y `revisa hosts`:
+        *   **Estado**: Pendiente.
+        *   **Descripción**: Actualmente se usan dos tareas con `shell`, `cat -A` y `grep` para leer el fichero `/etc/hosts` y buscar caracteres extraños.
+        *   **Solución Propuesta**:
+            1.  Reemplazar ambas tareas por una sola usando el módulo `ansible.builtin.slurp` para leer el contenido crudo de `/etc/hosts`.
+            2.  Mover la lógica de visualización (simulando `cat -A`) y validación (búsqueda de caracteres como `\r`) a la plantilla `cabecera.html.j2`.
+            3.  En la plantilla, usar `b64decode` para decodificar el contenido, `replace` para visualizar caracteres especiales, y un bucle con una condición `if '\r' in linea` para detectar y advertir sobre las líneas problemáticas.
+        *   **Beneficio**: Centraliza la lógica de presentación en la plantilla, elimina la dependencia de `cat -A` y `grep`, y usa un módulo de Ansible más eficiente.
 *   **08_seguridad.yml**:
     *   `Fichero config`
     *   `configuracion de dominio`
