@@ -183,3 +183,22 @@ The `cabecera.html.j2` template is already set up to handle this logic. For exam
 *   **11_enriquecidos.yml**:
     *   `procesos de aplicacion`
     *   `log de aplicacion`
+
+## 9. Use Relative Paths for Templates
+**Issue**: The `template` module in `12_report.yml` uses a hardcoded absolute path for the source template.
+```yaml
+- name: crea j2html
+  template:
+    src: "/home/reexus/parcheaAcceda2/parcheaAcceda2/roles/sgadprevio/templates/cabecera.html.j2"
+    dest: "{{ fichero }}"
+  delegate_to: "{{ reporting_host }}"
+```
+**Recommended Action**: Modify the `src` to be a relative path. Ansible's `template` module automatically searches for source files in the role's `templates` directory.
+```yaml
+- name: crea j2html
+  template:
+    src: "cabecera.html.j2"
+    dest: "{{ fichero }}"
+  delegate_to: "{{ reporting_host }}"
+```
+**Benefit**: This makes the role portable and independent of the directory structure on the control node.

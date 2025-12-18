@@ -183,3 +183,22 @@ La plantilla `cabecera.html.j2` ya está preparada para manejar esta lógica. Po
 *   **11_enriquecidos.yml**:
     *   `procesos de aplicacion`
     *   `log de aplicacion`
+
+## 9. Usar Rutas Relativas para las Plantillas
+**Problema**: El módulo `template` en `12_report.yml` usa una ruta absoluta hardcodeada para la plantilla de origen.
+```yaml
+- name: crea j2html
+  template:
+    src: "/home/reexus/parcheaAcceda2/parcheaAcceda2/roles/sgadprevio/templates/cabecera.html.j2"
+    dest: "{{ fichero }}"
+  delegate_to: "{{ reporting_host }}"
+```
+**Acción Recomendada**: Modificar el `src` para que sea una ruta relativa. El módulo `template` de Ansible busca automáticamente los ficheros de origen en el directorio `templates` del rol.
+```yaml
+- name: crea j2html
+  template:
+    src: "cabecera.html.j2"
+    dest: "{{ fichero }}"
+  delegate_to: "{{ reporting_host }}"
+```
+**Beneficio**: Esto hace que el rol sea portable e independiente de la estructura de directorios en el nodo de control.
