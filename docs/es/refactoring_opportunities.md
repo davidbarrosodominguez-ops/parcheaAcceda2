@@ -2,7 +2,9 @@
 
 Este documento detalla áreas de mejora identificadas en el código actual para facilitar su mantenimiento, legibilidad y robustez.
 
-
+## 1. Eliminar Duplicación
+**Problema**: Existe una duplicación casi total entre el rol `sgadprevio` y el playbook `playbooks/rhel_SGADprevioAcceda2.yml`.
+**Acción Recomendada**: Eliminar o archivar `playbooks/rhel_SGADprevioAcceda2.yml`. Usar `sgadprevio.yml` exclusivamente, invocando el rol.
 
 ## 2. Gestión de Rutas y Variables
 **Problema**: Existen múltiples rutas y nombres de fichero definidos directamente en los ficheros de tareas y en el playbook principal, lo que dificulta la adaptación del rol a diferentes entornos.
@@ -49,7 +51,6 @@ Este documento detalla áreas de mejora identificadas en el código actual para 
 - Usar bloques `block/rescue/always` para gestionar errores de forma controlada, permitiendo ejecutar tareas de limpieza o registrar mensajes de error específicos.
 - Utilizar módulos como `stat` para comprobar precondiciones (ej: si un fichero existe) antes de ejecutar un comando que dependa de él.
 
-
 ## 6. Generación de HTML
 **Problema**: En varias tareas se genera código HTML directamente desde el `shell` usando `echo`, especialmente para mostrar mensajes de error. Esto mezcla la lógica de recopilación de datos con la lógica de presentación.
 
@@ -60,8 +61,7 @@ Este documento detalla áreas de mejora identificadas en el código actual para 
   register: etcconfigini
   ignore_errors: True
 ```
-En este caso, la tarea de Ansible es responsable de generar un fragmento de HTML. Si se quisiera cambiar el estilo del error (e.g., usar una clase CSS en vez de `style=color:red`), habría que modificar el código de la tarea de Ansible, no la plantilla.o pasar el aviso a la plantilla.
-
+En este caso, la tarea de Ansible es responsable de generar un fragmento de HTML. Si se quisiera cambiar el estilo del error (e.g., usar una clase CSS en vez de `style=color:red`), habría que modificar el código de la tarea de Ansible, no la plantilla.
 
 **Acción Recomendada**:
 - **Separar Lógica y Presentación**: Las tareas de Ansible solo deben recopilar datos y registrar variables (e.g., `etcconfigini_found: false`).
