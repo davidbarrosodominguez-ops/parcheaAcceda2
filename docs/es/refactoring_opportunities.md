@@ -150,22 +150,7 @@ La plantilla `cabecera.html.j2` ya está preparada para manejar esta lógica. Po
     *   `chronyd`
     *   `Configuracion commvault`
     *   `status de RHC`
-    *   `Fichero HOSTS` y `revisa hosts`:
-        *   **Estado**: ✅ Completado.
-        *   **Descripción**: Se usaban dos tareas con `shell` para leer `/etc/hosts`.
-        *   **Solución Aplicada**:
-            1.  Se reemplazaron las dos tareas por una sola que usa el módulo `ansible.builtin.slurp` para leer `/etc/hosts` y registrar el resultado en `slurp_etc_hosts`.
-            2.  Se movió toda la lógica de presentación y validación a la plantilla `cabecera.html.j2`, que ahora decodifica el contenido, simula `cat -A` y comprueba la existencia de caracteres `\r` para mostrar una advertencia.
-        *   **Beneficio**: Lógica de presentación centralizada en la plantilla, eliminación de `shell` y uso de un módulo nativo más eficiente.
 *   **08_seguridad.yml**:
-    *   `Fichero FSTAB` y `revisa fstab`:
-        *   **Estado**: ✅ Completado.
-        *   **Descripción**: Se usaban dos tareas con `shell`: una para leer `/etc/fstab` con `cat -A` y otra para buscar errores en esa salida con `grep`.
-        *   **Solución Aplicada**:
-            1.  Se han reemplazado las dos tareas por una que usa `ansible.builtin.slurp` para leer el fichero de forma eficiente.
-            2.  Se ha añadido una segunda tarea con `ansible.builtin.set_fact` para decodificar el contenido y almacenarlo en la variable `etcfstab.stdout`, manteniendo la compatibilidad con la plantilla.
-            3.  Se ha movido la lógica de validación a la plantilla `cabecera.html.j2`, que ahora busca caracteres problemáticos (`\t`, `^`) en el contenido y muestra una advertencia o un mensaje de éxito.
-        *   **Beneficio**: Se ha eliminado el uso de `shell`, la lógica de presentación se ha centralizado en la plantilla y el proceso es más eficiente al leer el fichero una sola vez.
     *   `Fichero config`
     *   `configuracion de dominio`
 *   **10_discos.yml**:

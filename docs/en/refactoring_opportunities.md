@@ -150,22 +150,7 @@ The `cabecera.html.j2` template is already set up to handle this logic. For exam
     *   `chronyd`
     *   `Configuracion commvault`
     *   `status de RHC`
-    *   `Fichero HOSTS` and `revisa hosts`:
-        *   **Status**: ✅ Completed.
-        *   **Description**: Two tasks with `shell` were used to read `/etc/hosts`.
-        *   **Applied Solution**:
-            1.  Both tasks were replaced with a single one using the `ansible.builtin.slurp` module to read `/etc/hosts` and register the result in `slurp_etc_hosts`.
-            2.  All presentation and validation logic was moved to the `cabecera.html.j2` template, which now decodes the content, simulates `cat -A`, and checks for `\r` characters to display a warning.
-        *   **Benefit**: Centralized presentation logic in the template, eliminated `shell` usage, and now uses a more efficient native Ansible module.
 *   **08_seguridad.yml**:
-    *   `Fichero FSTAB` and `revisa fstab`:
-        *   **Status**: ✅ Completed.
-        *   **Description**: Two `shell` tasks were used: one to read `/etc/fstab` with `cat -A` and another to search for errors in that output with `grep`.
-        *   **Applied Solution**:
-            1.  The two tasks were replaced by one that uses `ansible.builtin.slurp` to read the file efficiently.
-            2.  A second task was added with `ansible.builtin.set_fact` to decode the content and store it in the `etcfstab.stdout` variable, maintaining template compatibility.
-            3.  The validation logic was moved to the `cabecera.html.j2` template, which now checks for problematic characters (`\t`, `^`) in the content and displays a warning or success message.
-        *   **Benefit**: `shell` usage has been eliminated, presentation logic is centralized in the template, and the process is more efficient as the file is read only once.
     *   `Fichero config`
     *   `configuracion de dominio`
 *   **10_discos.yml**:
