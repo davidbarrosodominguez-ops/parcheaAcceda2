@@ -1115,9 +1115,15 @@
 	<div class="mt-4 overflow-x-auto transition-colors">
 		<section id="DOMINIO">
 			<div class="bg-white dark:bg-[#23272F] rounded shadow-lg p-8 border border-gray-200 dark:border-[#374151]">
-			 <h2 class="text-xl font-medium text-primary dark:text-white mb-6 transition-colors">Dominio</h2>
-			<details class="group border border-gray-200 dark:border-gray-700 rounded mb-4 transition-colors"><summary>DATOS DE DOMINIO</summary>
-				<p>{{ realmlist.stdout_lines |join('<br>')}}</details></p>
+			    <h2 class="text-xl font-medium text-primary dark:text-white mb-6 transition-colors">Dominio</h2>
+			    <details class="group border border-gray-200 dark:border-gray-700 rounded mb-4 transition-colors">
+                    <summary>DATOS DE DOMINIO</summary>
+                    {% if realmlist.stdout | trim %}
+                        <p>{{ realmlist.stdout_lines | join('<br>') }}</p>
+                    {% else %}
+                        <p style="color:red;">REVISAR_⚠️ ⚠️ NO HAY CONFIGURACIÓN DE DOMINIO (REALMD)_REVISAR</p>
+                    {% endif %}
+                </details>
 			</div>
 <!--			</section> -->
 

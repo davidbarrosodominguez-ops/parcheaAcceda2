@@ -43,9 +43,11 @@
       changed_when: false
       ignore_errors: True # Ignorar si ls falla por permisos, etc. La plantilla lo gestionará.
 
-    - name: configuracion de dominio
-      shell: realm list |grep ':' || echo -e '<p style=color:red;>⚠️ ⚠️ REVISAR_⚠️ ⚠️ SIN CONFIGURACIÓN REALMD _REVISAR</p>'
+    - name: Obtener configuracion de dominio (realm)
+      shell: realm list | grep ':'
       register: realmlist
+      ignore_errors: True
+      changed_when: false
 
     - name: Fichero config dominio
       command: cat -A /etc/sssd/sssd.conf
