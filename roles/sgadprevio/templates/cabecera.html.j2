@@ -1055,11 +1055,20 @@
 </details>
 <!--  Section -->
 
-                <h3 id="FICHERO CONFIG"></h3><details class="group border border-gray-200 dark:border-gray-700 rounded mb-4 transition-colors"><summary>FICHERO CONFIG {{aplicacion.stdout}}</summary>
-
- <br><pre>{{ etcconfigini.stdout_lines|join('<br>') }}</pre><p> 
-
-                      	</p></details>
+                <h3 id="FICHERO CONFIG"></h3>
+                <details class="group border border-gray-200 dark:border-gray-700 rounded mb-4 transition-colors">
+                    <summary>FICHERO CONFIG {{aplicacion.stdout}}</summary>
+                    {% if app_config_dir_stat.stat.exists and app_config_dir_stat.stat.isdir and etcconfigini.stdout %}
+                        <div class="mono bg-gray-50 dark:bg-gray-800 p-4 rounded mt-4">
+                            <pre class="whitespace-pre-wrap break-words">{{ etcconfigini.stdout }}</pre>
+                        </div>
+                    {% else %}
+                        <div class="mt-4 p-4 border-l-4 border-red-500 bg-red-100 dark:bg-red-900/20">
+                            <p class="font-bold text-red-700 dark:text-red-300">⚠️ SIN CONFIGURACIÓN</p>
+                            <p class="text-red-600 dark:text-red-400 mt-2">El directorio de configuración no se ha encontrado o está vacío en la ruta: <span class="mono">{{ app_config_path }}</span></p>
+                        </div>
+                    {% endif %}
+                </details>
 
 <!--  Section --> 
 

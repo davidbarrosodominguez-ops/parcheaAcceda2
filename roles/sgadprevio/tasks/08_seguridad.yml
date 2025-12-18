@@ -30,10 +30,18 @@
         etcfstab:
           stdout: "{{ slurp_etc_fstab.content | b64decode }}"
 
-    - name: Fichero config
-      shell: ls -ltra /opt/wildfly-10.1.0.Final/standalone/configuration/ || echo -e '<p style=color:red;>⚠️ ⚠️ REVISAR_⚠️ ⚠️ SIN CONFIGURACIÓN Fichero config _REVISAR</p>'
+    - name: Comprobar directorio de configuracion de la aplicacion
+      ansible.builtin.stat:
+        path: "{{ app_config_path }}"
+      register: app_config_dir_stat
+
+    - name: Listar ficheros de configuracion de la aplicacion
+      ansible.builtin.command:
+        cmd: "ls -ltra {{ app_config_path }}"
       register: etcconfigini
-      ignore_errors: True
+      when: app_config_dir_stat.stat.exists and app_config_dir_stat.stat.isdir
+      changed_when: false
+      ignore_errors: True # Ignorar si ls falla por permisos, etc. La plantilla lo gestionará.
 
     - name: configuracion de dominio
       shell: realm list |grep ':' || echo -e '<p style=color:red;>⚠️ ⚠️ REVISAR_⚠️ ⚠️ SIN CONFIGURACIÓN REALMD _REVISAR</p>'
