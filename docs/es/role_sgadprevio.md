@@ -64,7 +64,7 @@ El rol divide su lógica en múltiples ficheros de tareas (`tasks/`), importados
     *   Genera el CSV con el resumen.
     *   Envía el correo electrónico final usando `sendmail`.
 
-13. **`13_postchecks.yml`**:
+13. **`99_postchecks.yml`**:
     *   Limpia ficheros temporales.
     *   Mueve los informes al almacén definitivo.
 

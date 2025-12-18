@@ -22,7 +22,7 @@ graph TD
     end
     C11 --> D1
     B --> D
-    D2 --> E[Cleanup<br>13_postchecks];
+    D2 --> E[Cleanup<br>99_postchecks];
 ```
 
 ## Detailed Steps
@@ -30,4 +30,4 @@ graph TD
 2.  **Collection**: The `sgadprevio` role executes a series of data collection tasks on the target RHEL hosts. These tasks cover everything from subscription and repositories to network configuration, security, and hardware.
 3.  **Delegation and Assembly**: The data is processed and sent to the delegate node (`adgesasateinfc2`), where the `12_report.yml` task is responsible for rendering the `cabecera.html.j2` template to generate the final HTML report and a CSV summary.
 4.  **Notification**: `sendmail` is used on the delegate node to send an email with the attached report to the configured recipients.
-5.  **Cleanup**: The final task, `13_postchecks.yml`, removes the temporary files used during the process on the target hosts.
+5.  **Cleanup**: The final task, `99_postchecks.yml`, removes the temporary files used during the process on the target hosts.

@@ -24,7 +24,7 @@ graph TD
     end
     C11 --> D1
     B --> D
-    D2 --> E[Limpieza<br>13_postchecks];
+    D2 --> E[Limpieza<br>99_postchecks];
 ```
 
 1.  **Ejecución**: El usuario lanza el playbook `sgadprevio.yml` desde el nodo de control de Ansible.
@@ -48,7 +48,7 @@ La lógica principal reside en el rol `sgadprevio` y está dividida en las sigui
 - **`10_discos.yml`**: Analiza el uso del sistema de ficheros y puntos de montaje.
 - **`11_enriquecidos.yml`**: Cruza datos del host con ficheros externos para añadir información de contacto y aplicación.
 - **`12_report.yml`**: Genera los informes HTML/CSV y envía el correo. **(Se ejecuta en el nodo delegado)**.
-- **`13_postchecks.yml`**: Realiza tareas de limpieza post-ejecución.
+- **`99_postchecks.yml`**: Realiza tareas de limpieza post-ejecución.
 
 ## Configuración y Dependencias
 - **Usuario de Ejecución**: El playbook se ejecuta con el usuario `reexus` en los hosts remotos.

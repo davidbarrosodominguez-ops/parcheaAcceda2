@@ -22,7 +22,7 @@ graph TD
     end
     C11 --> D1
     B --> D
-    D2 --> E[Limpieza<br>13_postchecks];
+    D2 --> E[Limpieza<br>99_postchecks];
 ```
 
 ## Pasos Detallados
@@ -30,4 +30,4 @@ graph TD
 2.  **Recopilación**: El rol `sgadprevio` ejecuta una serie de tareas de recopilación de datos en los hosts RHEL destino. Estas tareas cubren desde la subscripción y repositorios hasta la configuración de red, seguridad y hardware.
 3.  **Delegación y Ensamblaje**: Los datos se procesan y se envían al nodo delegado (`adgesasateinfc2`), donde la tarea `12_report.yml` se encarga de renderizar la plantilla `cabecera.html.j2` para generar el informe HTML final y un resumen en formato CSV.
 4.  **Notificación**: Se utiliza `sendmail` en el nodo delegado para enviar un correo electrónico con el informe adjunto a los destinatarios configurados.
-5.  **Limpieza**: La tarea final, `13_postchecks.yml`, elimina los ficheros temporales utilizados durante el proceso en los hosts destino.
+5.  **Limpieza**: La tarea final, `99_postchecks.yml`, elimina los ficheros temporales utilizados durante el proceso en los hosts destino.

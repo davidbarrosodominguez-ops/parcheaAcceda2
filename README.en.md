@@ -24,7 +24,7 @@ graph TD
     end
     C11 --> D1
     B --> D
-    D2 --> E[Cleanup<br>13_postchecks];
+    D2 --> E[Cleanup<br>99_postchecks];
 ```
 
 1.  **Execution**: The user runs the `sgadprevio.yml` playbook from the Ansible control node.
@@ -48,7 +48,7 @@ The main logic resides in the `sgadprevio` role and is divided into the followin
 - **`10_discos.yml`**: Analyzes file system usage and mount points.
 - **`11_enriquecidos.yml`**: Cross-references host data with external files to add contact and application information.
 - **`12_report.yml`**: Generates the HTML/CSV reports and sends the email. **(Runs on the delegate node)**.
-- **`13_postchecks.yml`**: Performs post-execution cleanup tasks.
+- **`99_postchecks.yml`**: Performs post-execution cleanup tasks.
 
 ## Architectural Principle: Separation of Logic and Presentation
 

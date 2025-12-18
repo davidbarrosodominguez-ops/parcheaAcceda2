@@ -1,0 +1,62 @@
+
+    - name: release actual
+      shell: "subscription-manager release --set {{ ansible_distribution_version }} && subscription-manager refresh"
+
+    - name: Limpia ficheros
+      file:
+            path: "{{ item }}"
+            state: absent
+      with_items:
+            - "{{ fich1 }}"
+            - "{{ fich2 }}"
+            - "{{ fich3 }}"
+
+    - name: Guarda resultados
+      copy:
+          src: "{{ item.src }}"
+          dest: "/home/reexus/Acceda2/SGADprevio/almacen/"
+          owner: reexus
+          group: reexus
+      delegate_to: "{{ reporting_host }}"
+
+    - name: Valida copia de resultados
+      stat:
+        path: "/home/reexus/Acceda2/SGADprevio/almacen/{{ item.src | basename }}"
+      with_items:
+            - src: "/home/reexus/Acceda2/SGADprevio/rhel_previo_{{ ansible_hostname }}_{{ ansible_distribution_version }}_{{ ansible_date_time.date }}.html"
+            - src: "/home/reexus/Acceda2/SGADprevio/rhel_previo_{{ ansible_hostname }}_{{ ansible_distribution_version }}_{{ ansible_date_time.date }}.csv"
+      delegate_to: "{{ reporting_host }}"
+      register: copia_stat_result
+
+    - name: Registra los fallos en la copia de resultados
+      set_fact:
+        postcheck_copy_failed_files: "{{ postcheck_copy_failed_files | default([]) + [item.item.src | basename] }}"
+      when: not item.stat.exists
+      with_items: "{{ copia_stat_result.results }}"
+      delegate_to: "{{ reporting_host }}"
+
+    - name: Elimina ficheros temporales
+      file:
+        path: "{{ item.src }}"
+        state: absent
+      with_items:
+            - src: "/home/reexus/Acceda2/SGADprevio/rhel_previo_{{ ansible_hostname }}_{{ ansible_distribution_version }}_{{ ansible_date_time.date }}.html"
+            - src: "/home/reexus/Acceda2/SGADprevio/rhel_previo_{{ ansible_hostname }}_{{ ansible_distribution_version }}_{{ ansible_date_time.date }}.csv"
+      delegate_to: "{{ reporting_host }}"
+
+    - name: Valida limpieza de ficheros temporales
+      stat:
+        path: "{{ item.src }}"
+      with_items:
+            - src: "/home/reexus/Acceda2/SGADprevio/rhel_previo_{{ ansible_hostname }}_{{ ansible_distribution_version }}_{{ ansible_date_time.date }}.html"
+            - src: "/home/reexus/Acceda2/SGADprevio/rhel_previo_{{ ansible_hostname }}_{{ ansible_distribution_version }}_{{ ansible_date_time.date }}.csv"
+      delegate_to: "{{ reporting_host }}"
+      register: limpieza_stat_result
+
+    - name: Registra los fallos en la limpieza de ficheros
+      set_fact:
+        postcheck_cleanup_failed_files: "{{ postcheck_cleanup_failed_files | default([]) + [item.item.src | basename] }}"
+      when: item.stat.exists
+      with_items: "{{ limpieza_stat_result.results }}"
+      delegate_to: "{{ reporting_host }}"
+...
