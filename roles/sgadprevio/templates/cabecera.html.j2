@@ -1012,8 +1012,47 @@
 <!--  Section  -->
 
                 <h3 id="FICHEROS FSTAB"></h3><details class="group border border-gray-200 dark:border-gray-700 rounded mb-4 transition-colors"><summary>FICHERO FSTAB</summary>
-				<p>{{ etcfstab.stdout_lines |join('<br>')}}</p>
-				<p style=color:red;><table class="min-w-full rounded" border='1'> ⚠️CARACTERES{{ etcfstaberror.stdout }}</p></table></details>
+    
+    {% if etcfstab is defined and etcfstab.stdout %}
+        {% set fstab_content = etcfstab.stdout %}
+        {% set fstab_lines = fstab_content.split('\n') %}
+        
+        {# Mostramos el contenido del fichero fstab formateado #}
+        <div class="mono bg-gray-50 dark:bg-gray-800 p-4 rounded mt-4">
+            <pre class="whitespace-pre-wrap break-words">{{ fstab_content }}</pre>
+        </div>
+
+        {# Buscamos líneas con tabulaciones o el caracter literal '^' #}
+        {% set problematic_lines = [] %}
+        {% for line in fstab_lines %}
+            {% if line | regex_search('[\\t\\^]') %} {# Busca tabulaciones o '^' literales #}
+                {% set _ = problematic_lines.append(line) %}
+            {% endif %}
+        {% endfor %}
+
+        {# Mostramos una advertencia si se encontraron líneas problemáticas #}
+        {% if problematic_lines %}
+            <div class="mt-4 p-4 border-l-4 border-red-500 bg-red-100 dark:bg-red-900/20">
+                <p class="font-bold text-red-700 dark:text-red-300">⚠️ CARACTERES INESPERADOS DETECTADOS</p>
+                <p class="text-red-600 dark:text-red-400 mt-2">Se encontraron tabulaciones o caracteres (^) que podrían ser problemáticos. Revise las siguientes líneas:</p>
+                <ul class="list-disc list-inside mt-2 mono text-sm">
+                {% for line in problematic_lines %}
+                    <li>{{ line }}</li>
+                {% endfor %}
+                </ul>
+            </div>
+        {% else %}
+            <div class="mt-4 p-4 border-l-4 border-green-500 bg-green-100 dark:bg-green-900/20">
+                <p class="font-bold text-green-700 dark:text-green-300">✔ Fichero /etc/fstab sin caracteres inesperados.</p>
+            </div>
+        {% endif %}
+
+    {% else %}
+        <div class="mt-4 p-4 border-l-4 border-yellow-500 bg-yellow-100 dark:bg-yellow-900/20">
+            <p class="font-bold text-yellow-700 dark:text-yellow-300">No se pudo leer el fichero /etc/fstab.</p>
+        </div>
+    {% endif %}
+</details>
 <!--  Section -->
 
                 <h3 id="FICHERO CONFIG"></h3><details class="group border border-gray-200 dark:border-gray-700 rounded mb-4 transition-colors"><summary>FICHERO CONFIG {{aplicacion.stdout}}</summary>

@@ -20,13 +20,15 @@
       ignore_errors: True
 
 
-    - name: Fichero FSTAB
-      shell: cat -A /etc/fstab
-      register: etcfstab
+    - name: Leer fichero /etc/fstab
+      ansible.builtin.slurp:
+        src: /etc/fstab
+      register: slurp_etc_fstab
 
-    - name: revisa fstab
-      shell: echo -e "$(cat -A /etc/fstab|grep -E '\^')"
-      register: etcfstaberror
+    - name: Preparar salida de fstab para reporte
+      ansible.builtin.set_fact:
+        etcfstab:
+          stdout: "{{ slurp_etc_fstab.content | b64decode }}"
 
     - name: Fichero config
       shell: ls -ltra /opt/wildfly-10.1.0.Final/standalone/configuration/ || echo -e '<p style=color:red;>⚠️ ⚠️ REVISAR_⚠️ ⚠️ SIN CONFIGURACIÓN Fichero config _REVISAR</p>'
