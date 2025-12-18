@@ -173,6 +173,28 @@ La plantilla `cabecera.html.j2` ya está preparada para manejar esta lógica. Po
         *   **Estado**: En progreso.
         *   **Descripción**: La tarea `MONTAJE DISCOS` ha sido duplicada. La versión `(new)` utiliza `ansible_facts` y la `(old)` mantiene el `shell`.
         *   **Acción pendiente**: Tras validar el informe con la nueva implementación, se debe eliminar la tarea `MONTAJE DISCOS (old)` y la sección correspondiente en la plantilla.
+    *   `uso_disco`:
+        *   **Estado**: 📝 Planificado.
+        *   **Descripción**: La tarea `Obtener uso del disco (filtrado)` ejecuta `df -h`, lo cual es redundante ya que Ansible provee esta información en la variable `ansible_mounts`. La plantilla, además, contiene una lógica compleja y frágil para interpretar la salida de texto de `df -h`.
+        *   **Solución Propuesta**:
+            1.  **Eliminar la tarea**: Borrar la tarea `Obtener uso del disco (filtrado)` del fichero `roles/sgadprevio/tasks/10_discos.yml`.
+            2.  **Refactorizar la plantilla**: Actualizar la sección "OCUPACIÓN DE DISCOS" en `cabecera.html.j2` para que itere directamente sobre la lista `ansible_mounts`. Esto permite un acceso directo y fiable a los datos (espacio total, disponible, etc.) y simplifica enormemente el código de la plantilla.
+                ```jinja
+                {# Ejemplo de la nueva lógica en la plantilla #}
+                {% for mount in ansible_mounts %}
+                  {% if mount.device != 'tmpfs' and mount.device != 'devtmpfs' %}
+                  <tr>
+                      <td>{{ mount.mount }}</td>
+                      <td style="color: {% if mount.size_total > 0 and (mount.size_available / mount.size_total * 100) < 20 %}red{% elif mount.size_total > 0 and (mount.size_available / mount.size_total * 100) < 40 %}orange{% else %}inherit{% endif %}; font-weight: bold;">
+                          {{ '%.2f'|format((1 - mount.size_available / mount.size_total) * 100) }}%
+                      </td>
+                      <td>{{ '%.2f'|format(mount.size_total / 1024/1024/1024) }} GB</td>
+                      <td>{{ '%.2f'|format(mount.size_available / 1024/1024/1024) }} GB</td>
+                  </tr>
+                  {% endif %}
+                {% endfor %}
+                ```
+        *   **Beneficio**: Elimina una tarea redundante, reduce la complejidad de la plantilla, aumenta la fiabilidad de los datos y mejora el rendimiento al no ejecutar un comando innecesario.
 *   **11_enriquecidos.yml**:
     *   `procesos de aplicacion`
     *   `log de aplicacion`
