@@ -1,7 +1,7 @@
 # 11_report.yml - render template, create CSV, send mail (delegated)
     - name: logo
       slurp:
-        src:  "/home/reexus/LOGO_GOB_MTDFP_AEAD.png"
+        src:  "{{ logo_file_path }}"
       register: logo
       delegate_to: "{{ reporting_host }}"
 
@@ -9,7 +9,7 @@
 
     - name: crea j2html
       template:
-        src: "/home/reexus/parcheaAcceda2/parcheaAcceda2/roles/sgadprevio/templates/cabecera.html.j2"
+        src: "cabecera.html.j2"
         dest: "{{ fichero }}"
       delegate_to: "{{ reporting_host }}"
 
@@ -32,7 +32,7 @@
                  RESULTADO PREVIO; DIAS ULTIMO REINICIO; FECHA DE PARCHEADO INICIAL;
                  2ª FECHA DE PARCHEADO ;3ª FECHA DE PARCHEADO ;4ª FECHA DE PARCHEADO ; ;
                  \n"
-        dest: "/home/reexus/Acceda2/SGADprevio/rhel_previo_{{ ansible_hostname }}_{{ ansible_distribution_version }}_{{ ansible_date_time.date }}.csv"
+        dest: "{{ csv_report_path }}"
       delegate_to: "{{ reporting_host }}"
 
 
@@ -53,7 +53,7 @@
                       $(echo  {{ fechas_parcheado.stdout_lines[1:2]}} | tr ',' ';');
                       $(echo  {{ fechas_parcheado.stdout_lines[2:3]}} | tr ',' ';');
                       $(echo  {{ fechas_parcheado.stdout_lines[3:4]}} | tr ',' ';');
-                      \n " >> "{{ fichero }}.csv"
+                      \n " >> "{{ csv_report_path }}"
       delegate_to: "{{ reporting_host }}"
       ignore_errors: True
 
@@ -67,8 +67,8 @@
         echo "Content-Type: multipart/mixed; boundary=boundary42; charset=utf-8"
         echo "--boundary42"
         echo "Content-Type: text/html; charset=utf-8"
-        echo "$(head -20  /home/reexus/Cloudera/cabecera.html)"
-        echo "$(head -22 /home/reexus/Cloudera/cabecera.html |tail -1 |sed -e 's/50%/20%/g')"
+        echo "$(head -20  {{ email_header_template_path }})"
+        echo "$(head -22 {{ email_header_template_path }} |tail -1 |sed -e 's/50%/20%/g')"
         echo "</header>"
         echo "<div style='text-align:center'>"
         echo "<br><h1><u>MANTENIMIENTO PREVIO PARCHEADO DE {{ ansible_distribution_version }} DE {{ ansible_hostname }}:<br></u></h1>"
@@ -85,10 +85,10 @@
         echo "</body>"
         echo "</html>"
         echo "--boundary42"
-        echo "Content-Type: application/octet-stream; name=$(basename '/home/reexus/Acceda2/SGADprevio/rhel_previo_{{ ansible_hostname }}_{{ ansible_distribution_version }}_{{ ansible_date_time.date }}.csv' ) "
+        echo "Content-Type: application/octet-stream; name=$(basename '{{ csv_report_path }}' ) "
         echo "Content-Transfer-Encoding: base64"
-        echo "Content-Disposition: attachment; filename=$(basename '/home/reexus/Acceda2/SGADprevio/rhel_previo_{{ ansible_hostname }}_{{ ansible_distribution_version }}_{{ ansible_date_time.date }}.csv' ) "
-        echo ";`cat '/home/reexus/Acceda2/SGADprevio/rhel_previo_{{ ansible_hostname }}_{{ ansible_distribution_version }}_{{ ansible_date_time.date }}.csv' | base64`"
+        echo "Content-Disposition: attachment; filename=$(basename '{{ csv_report_path }}' ) "
+        echo ";`cat '{{ csv_report_path }}' | base64`"
         echo "--boundary42"
         echo "Content-Transfer-Encoding: base64"
         echo "Content-Disposition: attachment; filename=$(basename '{{ fichero }}' ) "

@@ -14,17 +14,17 @@
     - name: Guarda resultados
       copy:
           src: "{{ item.src }}"
-          dest: "/home/reexus/Acceda2/SGADprevio/almacen/"
+          dest: "{{ report_archive_path }}"
           owner: reexus
           group: reexus
       delegate_to: "{{ reporting_host }}"
 
     - name: Valida copia de resultados
       stat:
-        path: "/home/reexus/Acceda2/SGADprevio/almacen/{{ item.src | basename }}"
+        path: "{{ report_archive_path }}{{ item.src | basename }}"
       with_items:
-            - src: "/home/reexus/Acceda2/SGADprevio/rhel_previo_{{ ansible_hostname }}_{{ ansible_distribution_version }}_{{ ansible_date_time.date }}.html"
-            - src: "/home/reexus/Acceda2/SGADprevio/rhel_previo_{{ ansible_hostname }}_{{ ansible_distribution_version }}_{{ ansible_date_time.date }}.csv"
+            - src: "{{ fichero }}"
+            - src: "{{ csv_report_path }}"
       delegate_to: "{{ reporting_host }}"
       register: copia_stat_result
 
@@ -40,16 +40,16 @@
         path: "{{ item.src }}"
         state: absent
       with_items:
-            - src: "/home/reexus/Acceda2/SGADprevio/rhel_previo_{{ ansible_hostname }}_{{ ansible_distribution_version }}_{{ ansible_date_time.date }}.html"
-            - src: "/home/reexus/Acceda2/SGADprevio/rhel_previo_{{ ansible_hostname }}_{{ ansible_distribution_version }}_{{ ansible_date_time.date }}.csv"
+            - src: "{{ fichero }}"
+            - src: "{{ csv_report_path }}"
       delegate_to: "{{ reporting_host }}"
 
     - name: Valida limpieza de ficheros temporales
       stat:
         path: "{{ item.src }}"
       with_items:
-            - src: "/home/reexus/Acceda2/SGADprevio/rhel_previo_{{ ansible_hostname }}_{{ ansible_distribution_version }}_{{ ansible_date_time.date }}.html"
-            - src: "/home/reexus/Acceda2/SGADprevio/rhel_previo_{{ ansible_hostname }}_{{ ansible_distribution_version }}_{{ ansible_date_time.date }}.csv"
+            - src: "{{ fichero }}"
+            - src: "{{ csv_report_path }}"
       delegate_to: "{{ reporting_host }}"
       register: limpieza_stat_result
 

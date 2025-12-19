@@ -1,30 +1,30 @@
 # 10_enriquecidos.yml - enrichment and contact info (delegated)
     - name: fecha de parcheado inicial del ciclo
-      shell: echo -e "$(grep -ih {{ ansible_hostname }}.gest.2001.nubesara.es /home/reexus/enriquece/paraenriquecerParchea.lst | awk '{print $(NF-2)}' )" 
+      shell: echo -e "$(grep -ih {{ ansible_hostname }}.gest.2001.nubesara.es {{ enrichment_file_path }} | awk '{print $(NF-2)}' )" 
       register: fechaparcheado
       delegate_to: "{{ reporting_host }}"
       ignore_errors: True
 
 #    - name: Asignar enriquece datos
-#      shell: grep -ih {{ ansible_hostname }} /home/reexus/enriquece/paraenriquecerParchea.lst  || echo -e '<p style=color:red;>REVISAR_⚠️ ⚠️NO HAY DATOS ENRIQUECIDOS_REVISAR</p>'
+#      shell: grep -ih {{ ansible_hostname }} {{ enrichment_file_path }}  || echo -e '<p style=color:red;>REVISAR_⚠️ ⚠️NO HAY DATOS ENRIQUECIDOS_REVISAR</p>'
 #      register: enriquece
 #      delegate_to: adgesasateinfc2
 #      ignore_errors: True
 
     - name: Fechas de parcheado
-      shell: echo -e "$(/bin/python3 /home/reexus/Acceda2/fechas_parcheado.py {{ fechaparcheado.stdout }} 6 | sort -u )"
+      shell: echo -e "$(/bin/python3 {{ patching_dates_script_path }} {{ fechaparcheado.stdout }} 6 | sort -u )"
       register: fechas_parcheado
       delegate_to: "{{ reporting_host }}"
       ignore_errors: True
 
     - name: contacto
-      shell: echo  "$(grep -ih {{ ansible_hostname }} /home/reexus/enriquece/paraenriquecerParchea.lst |awk '{print $NF}')"
+      shell: echo  "$(grep -ih {{ ansible_hostname }} {{ enrichment_file_path }} |awk '{print $NF}')"
       register: contacto
       delegate_to: "{{ reporting_host }}"
       ignore_errors: True
 
     - name: Aplicacion 
-      shell: echo -e $(grep -ih {{ ansible_hostname }} /home/reexus/enriquece/paraenriquecerParchea.lst |awk '{print $(NF-1)}')
+      shell: echo -e $(grep -ih {{ ansible_hostname }} {{ enrichment_file_path }} |awk '{print $(NF-1)}')
       register: aplicacion
       delegate_to: "{{ reporting_host }}"
       ignore_errors: True
