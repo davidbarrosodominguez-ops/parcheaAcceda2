@@ -13,6 +13,8 @@ Este documento detalla áreas de mejora identificadas en el código actual para 
 - **Playbook Principal (`sgadprevio.yml`):** Las rutas para los ficheros temporales y el informe final están hardcodeadas (e.g., `/home/reexus/Acceda2/SGADprevio/rhel_previo_{{...}}.html`).
 - **Tarea de Seguridad (`08_seguridad.yml`):** La ruta para encontrar la configuración de la aplicación está fijada a una versión específica de Wildfly: `/opt/wildfly-10.1.0.Final/standalone/configuration/`.
 - **Tareas de Enriquecimiento (`11_enriquecidos.yml`):** Las rutas a los ficheros de enriquecimiento (`paraenriquecerParchea.lst`) y el logotipo (`LOGO_GOB_MTDFP_AEAD.png`) son absolutas y dependen del usuario `reexus`.
+- **Rutas de Logs de Aplicación (`11_enriquecidos.yml`):** La tarea `log de aplicacion` define rutas a logs específicos de aplicación: `/opt/appian/appian/logs/tomcat-stdOut.log` y `/opt/sophos-spl/plugins/eventjournaler/log/eventjournaler.log`.
+- **Ruta de Escaneo de Disco (`10_discos.yml`):** La tarea `size en opt` usa una ruta `paths: /opt/` definida directamente.
 
 **Acción Recomendada**:
 - **Centralizar variables:** Mover todas estas rutas al fichero de variables del rol (`roles/sgadprevio/vars/all_vars.yml`).
@@ -21,6 +23,8 @@ Este documento detalla áreas de mejora identificadas en el código actual para 
   - `app_config_path`: Ruta al directorio de configuración de la aplicación.
   - `enrichment_file_path`: Ruta al fichero de enriquecimiento.
   - `logo_file_path`: Ruta al fichero del logotipo.
+  - `app_log_paths`: Una lista de ficheros de log de aplicación a comprobar.
+  - `scan_paths`: Una lista de directorios a escanear para el uso de disco.
 - Esto permitiría que un usuario sobreescribiera fácilmente estas rutas desde el inventario o un fichero de variables extra, haciendo el rol mucho más reutilizable.
 
 ## 3. Uso de Módulos de Ansible vs Shell

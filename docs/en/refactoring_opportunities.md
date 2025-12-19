@@ -13,6 +13,8 @@ This document details areas for improvement identified in the current code to fa
 - **Main Playbook (`sgadprevio.yml`):** The paths for temporary files and the final report are hardcoded (e.g., `/home/reexus/Acceda2/SGADprevio/rhel_previo_{{...}}.html`).
 - **Security Task (`08_seguridad.yml`):** The path to find the application's configuration is fixed to a specific Wildfly version: `/opt/wildfly-10.1.0.Final/standalone/configuration/`.
 - **Enrichment Tasks (`11_enriquecidos.yml`):** The paths to the enrichment files (`paraenriquecerParchea.lst`) and the logo (`LOGO_GOB_MTDFP_AEAD.png`) are absolute and depend on the `reexus` user.
+- **Application Log Paths (`11_enriquecidos.yml`):** The task `log de aplicacion` hardcodes paths to specific application logs: `/opt/appian/appian/logs/tomcat-stdOut.log` and `/opt/sophos-spl/plugins/eventjournaler/log/eventjournaler.log`.
+- **Disk Usage Scan Path (`10_discos.yml`):** The task `size en opt` uses a hardcoded `paths: /opt/`.
 
 **Recommended Action**:
 - **Centralize variables:** Move all these paths to the role's variables file (`roles/sgadprevio/vars/all_vars.yml`).
@@ -21,6 +23,8 @@ This document details areas for improvement identified in the current code to fa
   - `app_config_path`: Path to the application's configuration directory.
   - `enrichment_file_path`: Path to the enrichment file.
   - `logo_file_path`: Path to the logo file.
+  - `app_log_paths`: A list of application log files to check.
+  - `scan_paths`: A list of directories to scan for disk usage.
 - This would allow a user to easily override these paths from the inventory or an extra variables file, making the role much more reusable.
 
 ## 3. Ansible Modules vs Shell Usage
