@@ -206,3 +206,19 @@ La plantilla `cabecera.html.j2` ya está preparada para manejar esta lógica. Po
   delegate_to: "{{ reporting_host }}"
 ```
 **Beneficio**: Esto hace que el rol sea portable e independiente de la estructura de directorios en el nodo de control.
+
+## 10. Refactorización de `02_subscription.yml`
+
+El fichero de tareas `02_subscription.yml` presenta varias oportunidades de mejora para alinearlo con las buenas prácticas, principalmente separando la obtención de datos de la presentación y usando funcionalidades nativas de Ansible.
+
+*   **Generación de HTML en las tareas**:
+    *   **Problema**: Tareas como `Si o no hay updates`, `Imprime si hay updates`, y `Ultimo kernel instalado` generan fragmentos de HTML (`<h1>`, `<br>`, `<b>`) directamente en los módulos `shell` o `debug`. Otras tareas como `Version sugerida por redhat` y `subscripcion` generan etiquetas `<p>` de HTML para los mensajes de error.
+    *   **Acción Recomendada**: Estas tareas solo deberían registrar datos en crudo. Toda la generación de HTML debería moverse a la plantilla `cabecera.html.j2`. Por ejemplo, en lugar de crear un mensaje HTML sobre las actualizaciones, se debería registrar una variable booleana como `has_updates: true`, y la plantilla debería usarla para renderizar el mensaje correcto.
+
+*   **Comando `uptime` Redundante**:
+    *   **Problema**: La tarea `ultimo reinicio` usa `uptime | cut ...` para obtener el tiempo de actividad del sistema.
+    *   **Acción Recomendada**: Esta tarea debería eliminarse. El "fact" nativo de Ansible `ansible_uptime_seconds` ya proporciona esta información de forma más fiable y eficiente. El cálculo y formateo (e.g., convertir segundos a días) debería hacerse en la plantilla.
+
+*   **Versión de "Release" Fija en el Código**:
+    *   **Problema**: La tarea `set release subscripcion` fija la versión del "release" con `subscription-manager release --set 8.10`.
+    *   **Acción Recomendada**: Debería usar la variable `{{ versionfutura.stdout }}`, que ya se calcula en una tarea anterior, para que sea dinámico.

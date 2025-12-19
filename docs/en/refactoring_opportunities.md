@@ -206,3 +206,19 @@ The `cabecera.html.j2` template is already set up to handle this logic. For exam
   delegate_to: "{{ reporting_host }}"
 ```
 **Benefit**: This makes the role portable and independent of the directory structure on the control node.
+
+## 10. Refactoring `02_subscription.yml`
+
+The `02_subscription.yml` task file presents several opportunities to align with best practices, primarily by separating data collection from presentation and using built-in Ansible features.
+
+*   **HTML Generation in Tasks**:
+    *   **Issue**: Tasks like `Si o no hay updates`, `Imprime si hay updates`, and `Ultimo kernel instalado` generate HTML fragments (`<h1>`, `<br>`, `<b>`) directly within the `shell` or `debug` modules. Other tasks like `Version sugerida por redhat` and `subscripcion` generate HTML `<p>` tags for error messages.
+    *   **Recommended Action**: These tasks should only register raw data. All HTML generation should be moved to the `cabecera.html.j2` template. For example, instead of creating an HTML message about updates, a boolean variable like `has_updates: true` should be registered, and the template should use it to render the correct message.
+
+*   **Redundant `uptime` Command**:
+    *   **Issue**: The `ultimo reinicio` task uses `uptime | cut ...` to get the system uptime.
+    *   **Recommended Action**: This task should be removed. The built-in Ansible fact `ansible_uptime_seconds` provides this information more reliably and efficiently. The calculation and formatting (e.g., converting seconds to days) should be done in the template.
+
+*   **Hardcoded Release Version**:
+    *   **Issue**: The `set release subscripcion` task hardcodes the release version with `subscription-manager release --set 8.10`.
+    *   **Recommended Action**: This should use the `{{ versionfutura.stdout }}` variable, which is already being calculated in a previous task, to make it dynamic.
