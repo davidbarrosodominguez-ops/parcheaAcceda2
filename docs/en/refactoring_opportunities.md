@@ -2,17 +2,11 @@
 
 This document details areas for improvement identified in the current code to facilitate maintenance, readability, and robustness.
 
-## 1. Eliminating Duplication
-**Issue**: There is almost total duplication between the `sgadprevio` role and the `playbooks/rhel_SGADprevioAcceda2.yml` playbook.
-**Recommended Action**: Delete or archive `playbooks/rhel_SGADprevioAcceda2.yml`. Use `sgadprevio.yml` exclusively, invoking the role.
-
-## 2. Path and Variable Management
+## 1. Path and Variable Management
 **Issue**: There are multiple paths and filenames defined directly in the task files and the main playbook, which makes it difficult to adapt the role to different environments.
 
 **Specific Examples:**
 - **Main Playbook (`sgadprevio.yml`):** The paths for temporary files and the final report are hardcoded (e.g., `/home/reexus/Acceda2/SGADprevio/rhel_previo_{{...}}.html`).
-- **Security Task (`08_seguridad.yml`):** The path to find the application's configuration is fixed to a specific Wildfly version: `/opt/wildfly-10.1.0.Final/standalone/configuration/`.
-- **Enrichment Tasks (`11_enriquecidos.yml`):** The paths to the enrichment files (`paraenriquecerParchea.lst`) and the logo (`LOGO_GOB_MTDFP_AEAD.png`) are absolute and depend on the `reexus` user.
 - **Application Log Paths (`11_enriquecidos.yml`):** The task `log de aplicacion` hardcodes paths to specific application logs: `/opt/appian/appian/logs/tomcat-stdOut.log` and `/opt/sophos-spl/plugins/eventjournaler/log/eventjournaler.log`.
 - **Disk Usage Scan Path (`10_discos.yml`):** The task `size en opt` uses a hardcoded `paths: /opt/`.
 
@@ -20,14 +14,11 @@ This document details areas for improvement identified in the current code to fa
 - **Centralize variables:** Move all these paths to the role's variables file (`roles/sgadprevio/vars/all_vars.yml`).
 - **Create variables for:**
   - `report_base_path`: Base directory for reports.
-  - `app_config_path`: Path to the application's configuration directory.
-  - `enrichment_file_path`: Path to the enrichment file.
-  - `logo_file_path`: Path to the logo file.
   - `app_log_paths`: A list of application log files to check.
   - `scan_paths`: A list of directories to scan for disk usage.
 - This would allow a user to easily override these paths from the inventory or an extra variables file, making the role much more reusable.
 
-## 3. Ansible Modules vs Shell Usage
+## 2. Ansible Modules vs Shell Usage
 **Issue**: Extensive use of `shell` and `command` modules with text processing (`grep`, `awk`, etc.) to obtain information that native Ansible modules or facts already provide in a more reliable and structured way.
 
 **Specific Examples:**
@@ -41,7 +32,7 @@ This document details areas for improvement identified in the current code to fa
 - Leverage Ansible facts (`ansible_mounts`, `ansible_default_ipv4`, etc.) instead of re-running commands that obtain the same information.
 - **Benefit**: This will make the role more idempotent, readable, faster (by reducing command executions), and less prone to breaking if the text format of a Linux command changes between versions.
 
-## 4. Error Handling
+## 3. Error Handling
 **Issue**: The `ignore_errors: True` parameter is overused (over 40 instances) to prevent the playbook from failing. This practice can mask real problems (e.g., a command does not exist, a service fails for an unexpected reason) and makes debugging difficult.
 
 **Specific Examples:**
@@ -55,7 +46,7 @@ This document details areas for improvement identified in the current code to fa
 - Use `block/rescue/always` blocks to manage errors in a controlled way, allowing cleanup tasks to run or specific error messages to be registered.
 - Use modules like `stat` to check preconditions (e.g., if a file exists) before running a command that depends on it.
 
-## 6. HTML Generation
+## 4. HTML Generation
 **Issue**: In several tasks, HTML code is generated directly from the `shell` using `echo`, especially for displaying error messages. This mixes data collection logic with presentation logic.
 
 **Specific Example (from `08_seguridad.yml`):**
@@ -77,7 +68,7 @@ In this case, the Ansible task is responsible for generating an HTML snippet. If
   ```
 - **Benefit**: This follows the principle of separation of concerns, making both the Ansible role and the HTML template much easier to maintain and modify independently.
 
-## 7. Implement Insecure Port Check
+## 5. Implement Insecure Port Check
 **Problem**: The specification `specs/REGLAS_SEGURIDAD.md` defines a rule to detect insecure open ports (e.g., 21/ftp, 23/telnet). However, this check is not currently implemented in any task, which creates an inconsistency between the documentation and the actual audit.
 
 **Recommended Action**:
@@ -87,7 +78,7 @@ In this case, the Ansible task is responsible for generating an HTML snippet. If
 - If a match is found, it should register a result that the template can use to display a `REVISAR_..._REVISAR` message in the final report.
 - **Benefit**: Increases the security audit's coverage and aligns the role's implementation with its specifications.
 
-## 8. Refactor Error Generation to the Template
+## 6. Refactor Error Generation to the Template
 **Problem**: Following the principle of point 6, many tasks that check states and can fail generate the `REVISAR_` message directly in the `shell`. This couples the task's logic to the error's presentation.
 
 **Refactoring Example**:
@@ -188,26 +179,7 @@ The `cabecera.html.j2` template is already set up to handle this logic. For exam
     *   `procesos de aplicacion`
     *   `log de aplicacion`
 
-## 9. Use Relative Paths for Templates
-**Issue**: The `template` module in `12_report.yml` uses a hardcoded absolute path for the source template.
-```yaml
-- name: crea j2html
-  template:
-    src: "/home/reexus/parcheaAcceda2/parcheaAcceda2/roles/sgadprevio/templates/cabecera.html.j2"
-    dest: "{{ fichero }}"
-  delegate_to: "{{ reporting_host }}"
-```
-**Recommended Action**: Modify the `src` to be a relative path. Ansible's `template` module automatically searches for source files in the role's `templates` directory.
-```yaml
-- name: crea j2html
-  template:
-    src: "cabecera.html.j2"
-    dest: "{{ fichero }}"
-  delegate_to: "{{ reporting_host }}"
-```
-**Benefit**: This makes the role portable and independent of the directory structure on the control node.
-
-## 10. Refactoring `02_subscription.yml`
+## 7. Refactoring `02_subscription.yml`
 
 The `02_subscription.yml` task file presents several opportunities to align with best practices, primarily by separating data collection from presentation and using built-in Ansible features.
 

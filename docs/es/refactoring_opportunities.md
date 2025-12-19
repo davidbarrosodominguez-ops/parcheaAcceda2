@@ -2,17 +2,11 @@
 
 Este documento detalla áreas de mejora identificadas en el código actual para facilitar su mantenimiento, legibilidad y robustez.
 
-## 1. Eliminar Duplicación
-**Problema**: Existe una duplicación casi total entre el rol `sgadprevio` y el playbook `playbooks/rhel_SGADprevioAcceda2.yml`.
-**Acción Recomendada**: Eliminar o archivar `playbooks/rhel_SGADprevioAcceda2.yml`. Usar `sgadprevio.yml` exclusivamente, invocando el rol.
-
-## 2. Gestión de Rutas y Variables
+## 1. Gestión de Rutas y Variables
 **Problema**: Existen múltiples rutas y nombres de fichero definidos directamente en los ficheros de tareas y en el playbook principal, lo que dificulta la adaptación del rol a diferentes entornos.
 
 **Ejemplos Específicos:**
 - **Playbook Principal (`sgadprevio.yml`):** Las rutas para los ficheros temporales y el informe final están hardcodeadas (e.g., `/home/reexus/Acceda2/SGADprevio/rhel_previo_{{...}}.html`).
-- **Tarea de Seguridad (`08_seguridad.yml`):** La ruta para encontrar la configuración de la aplicación está fijada a una versión específica de Wildfly: `/opt/wildfly-10.1.0.Final/standalone/configuration/`.
-- **Tareas de Enriquecimiento (`11_enriquecidos.yml`):** Las rutas a los ficheros de enriquecimiento (`paraenriquecerParchea.lst`) y el logotipo (`LOGO_GOB_MTDFP_AEAD.png`) son absolutas y dependen del usuario `reexus`.
 - **Rutas de Logs de Aplicación (`11_enriquecidos.yml`):** La tarea `log de aplicacion` define rutas a logs específicos de aplicación: `/opt/appian/appian/logs/tomcat-stdOut.log` y `/opt/sophos-spl/plugins/eventjournaler/log/eventjournaler.log`.
 - **Ruta de Escaneo de Disco (`10_discos.yml`):** La tarea `size en opt` usa una ruta `paths: /opt/` definida directamente.
 
@@ -20,14 +14,11 @@ Este documento detalla áreas de mejora identificadas en el código actual para 
 - **Centralizar variables:** Mover todas estas rutas al fichero de variables del rol (`roles/sgadprevio/vars/all_vars.yml`).
 - **Crear variables para:**
   - `report_base_path`: Directorio base para los informes.
-  - `app_config_path`: Ruta al directorio de configuración de la aplicación.
-  - `enrichment_file_path`: Ruta al fichero de enriquecimiento.
-  - `logo_file_path`: Ruta al fichero del logotipo.
   - `app_log_paths`: Una lista de ficheros de log de aplicación a comprobar.
   - `scan_paths`: Una lista de directorios a escanear para el uso de disco.
 - Esto permitiría que un usuario sobreescribiera fácilmente estas rutas desde el inventario o un fichero de variables extra, haciendo el rol mucho más reutilizable.
 
-## 3. Uso de Módulos de Ansible vs Shell
+## 2. Uso de Módulos de Ansible vs Shell
 **Problema**: Se usan de forma extensiva los módulos `shell` y `command` con procesado de texto (`grep`, `awk`, etc.) para obtener información que los módulos nativos de Ansible o los "facts" ya proveen de una forma más fiable y estructurada.
 
 **Ejemplos Específicos:**
@@ -41,7 +32,7 @@ Este documento detalla áreas de mejora identificadas en el código actual para 
 - Aprovechar los "Ansible facts" (`ansible_mounts`, `ansible_default_ipv4`, etc.) en lugar de volver a ejecutar comandos que obtienen esa misma información.
 - **Beneficio**: Esto hará el rol más idempotente, legible, rápido (al reducir ejecuciones de comandos) y menos propenso a romperse si el formato de texto de un comando de Linux cambia entre versiones.
 
-## 4. Gestión de Errores
+## 3. Gestión de Errores
 **Problema**: Se abusa del parámetro `ignore_errors: True` (más de 40 instancias) para evitar que el playbook falle. Esta práctica puede ocultar problemas reales (ej: un comando no existe, un servicio falla por una razón inesperada) y dificulta el diagnóstico.
 
 **Ejemplos Específicos:**
@@ -55,7 +46,7 @@ Este documento detalla áreas de mejora identificadas en el código actual para 
 - Usar bloques `block/rescue/always` para gestionar errores de forma controlada, permitiendo ejecutar tareas de limpieza o registrar mensajes de error específicos.
 - Utilizar módulos como `stat` para comprobar precondiciones (ej: si un fichero existe) antes de ejecutar un comando que dependa de él.
 
-## 6. Generación de HTML
+## 4. Generación de HTML
 **Problema**: En varias tareas se genera código HTML directamente desde el `shell` usando `echo`, especialmente para mostrar mensajes de error. Esto mezcla la lógica de recopilación de datos con la lógica de presentación.
 
 **Ejemplo Específico (de `08_seguridad.yml`):**
@@ -77,7 +68,7 @@ En este caso, la tarea de Ansible es responsable de generar un fragmento de HTML
   ```
 - **Beneficio**: Esto sigue el principio de separación de conceptos, haciendo que tanto el rol de Ansible como la plantilla HTML sean mucho más fáciles de mantener y modificar de forma independiente.
 
-## 7. Implementar Comprobación de Puertos Inseguros
+## 5. Implementar Comprobación de Puertos Inseguros
 **Problema**: La especificación `specs/REGLAS_SEGURIDAD.md` define una regla para detectar puertos inseguros abiertos (ej: 21/ftp, 23/telnet). Sin embargo, esta comprobación no está implementada actualmente en ninguna tarea, lo que genera una inconsistencia entre la documentación y la auditoría real.
 
 **Acción Recomendada**:
@@ -87,7 +78,7 @@ En este caso, la tarea de Ansible es responsable de generar un fragmento de HTML
 - Si se encuentra una coincidencia, se debe registrar un resultado que la plantilla pueda utilizar para mostrar un mensaje `REVISAR_..._REVISAR` en el informe final.
 - **Beneficio**: Aumenta la cobertura de la auditoría de seguridad y alinea la implementación del rol con sus especificaciones.
 
-## 8. Refactorizar Generación de Errores a la Plantilla
+## 6. Refactorizar Generación de Errores a la Plantilla
 **Problema**: Siguiendo el principio del punto 6, muchas tareas que comprueban estados y pueden fallar, generan el mensaje de `REVISAR_` directamente en la `shell`. Esto acopla la lógica de la tarea a la presentación del error.
 
 **Ejemplo de Refactorización**:
@@ -188,26 +179,7 @@ La plantilla `cabecera.html.j2` ya está preparada para manejar esta lógica. Po
     *   `procesos de aplicacion`
     *   `log de aplicacion`
 
-## 9. Usar Rutas Relativas para las Plantillas
-**Problema**: El módulo `template` en `12_report.yml` usa una ruta absoluta hardcodeada para la plantilla de origen.
-```yaml
-- name: crea j2html
-  template:
-    src: "/home/reexus/parcheaAcceda2/parcheaAcceda2/roles/sgadprevio/templates/cabecera.html.j2"
-    dest: "{{ fichero }}"
-  delegate_to: "{{ reporting_host }}"
-```
-**Acción Recomendada**: Modificar el `src` para que sea una ruta relativa. El módulo `template` de Ansible busca automáticamente los ficheros de origen en el directorio `templates` del rol.
-```yaml
-- name: crea j2html
-  template:
-    src: "cabecera.html.j2"
-    dest: "{{ fichero }}"
-  delegate_to: "{{ reporting_host }}"
-```
-**Beneficio**: Esto hace que el rol sea portable e independiente de la estructura de directorios en el nodo de control.
-
-## 10. Refactorización de `02_subscription.yml`
+## 7. Refactorización de `02_subscription.yml`
 
 El fichero de tareas `02_subscription.yml` presenta varias oportunidades de mejora para alinearlo con las buenas prácticas, principalmente separando la obtención de datos de la presentación y usando funcionalidades nativas de Ansible.
 
