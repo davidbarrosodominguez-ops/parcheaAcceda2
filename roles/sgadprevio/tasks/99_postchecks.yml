@@ -18,6 +18,9 @@
           owner: reexus
           group: reexus
       delegate_to: "{{ reporting_host }}"
+      with_items:
+            - src: "{{ fichero }}"
+            - src: "{{ csv_report_path }}"
 
     - name: Valida copia de resultados
       stat:
