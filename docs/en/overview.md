@@ -3,6 +3,15 @@
 ## Introduction
 This project implements an automated pre-patching audit ("Health Check") for Red Hat Enterprise Linux (RHEL) servers. Its goal is to collect the current system status, verify update prerequisites, and generate detailed reports for administrators.
 
+## Architectural Model
+This project fits perfectly into the **Infrastructure as Code (IaC)** model, and can also be classified within the following patterns:
+
+*   **Configuration Management:** It uses Ansible to define and maintain the desired state of the systems.
+*   **IT Automation:** It automates repetitive audit and reporting tasks that a system administrator would traditionally perform.
+*   **Compliance as Code:** The audit rules are implemented in code (Ansible playbooks) to automatically verify compliance with security and configuration policies.
+
+It is a classic example of using automation to ensure that the infrastructure complies with a defined standard.
+
 ## Directory Structure
 The project follows a standard Ansible structure with some specificities:
 

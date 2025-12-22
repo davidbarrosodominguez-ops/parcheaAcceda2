@@ -3,6 +3,15 @@
 ## Introducción
 Este proyecto implementa una auditoría automática previa al parcheado ("Health Check") para servidores Red Hat Enterprise Linux (RHEL). Su objetivo es recopilar el estado actual del sistema, verificar prerequisitos de actualización y generar informes detallados para los administradores.
 
+## Modelo Arquitectónico
+Este proyecto encaja perfectamente en el modelo de **Infraestructura como Código (IaC)**, y también se puede clasificar dentro de los siguientes patrones:
+
+*   **Gestión de la Configuración:** Utiliza Ansible para definir y mantener el estado deseado de los sistemas.
+*   **Automatización de TI:** Automatiza tareas repetitivas de auditoría y reporte que tradicionalmente haría un administrador de sistemas.
+*   **Cumplimiento como Código (Compliance as Code):** Las reglas de auditoría se implementan en código (playbooks de Ansible) para verificar automáticamente el cumplimiento de las políticas de seguridad y configuración.
+
+Es un ejemplo clásico de cómo usar la automatización para garantizar que la infraestructura cumple con un estándar definido.
+
 ## Estructura del Directorio
 El proyecto sigue una estructura estándar de Ansible, aunque con algunas particularidades:
 
