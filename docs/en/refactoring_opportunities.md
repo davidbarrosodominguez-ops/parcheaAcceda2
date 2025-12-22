@@ -49,6 +49,15 @@ This document details areas for improvement identified in the current code to fa
 ## 4. HTML Generation
 **Issue**: In several tasks, HTML code is generated directly from the `shell` using `echo`, especially for displaying error messages. This mixes data collection logic with presentation logic.
 
+**Specific Example (from `03_repos.yml`):**
+The `Repositorios disponibles` task uses a complex chain of `yum`, `sed`, `grep`, and `awk` to generate an entire HTML table directly from the shell.
+
+```yaml
+- name: Repositorios disponibles en {{ ansible_hostname }}
+  shell: echo -e  "$(yum repolist enabled | ... | awk '...{print "<tr><th>" $1...}')"
+```
+This is a clear violation of the separation of concerns principle, as the task is heavily involved in presentation logic.
+
 **Specific Example (from `08_seguridad.yml`):**
 ```yaml
 - name: Fichero config
@@ -121,9 +130,6 @@ The `cabecera.html.j2` template is already set up to handle this logic. For exam
 *   **02_subscription.yml**:
     *   `Version sugerida por redhat`
     *   `subscripcion`
-*   **03_repos.yml**:
-    *   `Repositorios disponibles`
-    *   `release en satellite`
 *   **05_updates.yml**:
     *   `paquetes obsoletos o sin reclamo`
 *   **06_red.yml**:
